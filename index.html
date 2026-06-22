@@ -423,6 +423,7 @@
                     <i data-lucide="shield-check" class="w-5 h-5"></i>
                 </div>
                 <span id="game-title-bar" class="font-black text-sm text-slate-200"></span>
+                <div id="game-mastery-control" class="hidden flex items-center gap-1 bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700"></div>
             </div>
             <div class="flex items-center gap-3">
                 <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 text-xs">
@@ -3093,8 +3094,8 @@
                 <!-- 進度 -->
                 <div class="flex items-center gap-3 mt-4">
                     <span class="text-xs text-slate-400">題目 <span id="g29-qnum" class="text-white font-bold">1</span> / <span id="g29-qtotal" class="text-white font-bold">1</span></span>
-                    <div class="flex-1 bg-slate-700 rounded-full h-1.5">
-                        <div id="g29-progress" class="bg-emerald-500 h-1.5 rounded-full transition-all" style="width:100%"></div>
+                    <div id="g29-progress-track" class="flex-1 bg-slate-700 rounded-full h-3 cursor-pointer overflow-hidden" onclick="g29ProgressJump(event)" onkeydown="g29ProgressKey(event)" tabindex="0" role="slider" aria-label="切換計算題題目" title="點擊進度條切換題目">
+                        <div id="g29-progress" class="bg-emerald-500 h-full rounded-full transition-all" style="width:100%"></div>
                     </div>
                 </div>
 
@@ -3280,6 +3281,7 @@
     <script>
         let activeSelection = null;
         let completedGames = { game1: false, game2: false, game3: false, game4: false, game5: false, game6: false, game7: false, game8: false, game9: false, game10: false, game11: false, game12: false, game13: false, game14: false, game15: false, game16: false, game17: false, game18: false, game19: false, game20: false, game21: false, game22: false , game23: false, game24: false, game25: false, game26: false, game27: false, game28: false, game29: false, game30: false, game31: false, game32: false, game33: false, game34: false};
+        let gameMastery = {};
 
         // --- 音效 ---
         function soundClick() { try { const a = new AudioContext(); const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 440; g.gain.setValueAtTime(0.1, a.currentTime); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.1); o.start(a.currentTime); o.stop(a.currentTime + 0.1); } catch(e){} }
@@ -4877,6 +4879,47 @@ function checkGame10() {
             }
         }
 
+        function getGameMastery(gameNum) {
+            const value = Number(gameMastery['game' + gameNum] || 0);
+            return Number.isFinite(value) ? Math.max(0, Math.min(5, value)) : 0;
+        }
+
+        function gameMasteryLabel(value) {
+            return ['未評分', '極不熟', '不熟', '普通', '熟練', '非常熟練'][value] || '未評分';
+        }
+
+        function renderGameMasteryStars(gameNum, interactive) {
+            const rating = getGameMastery(gameNum);
+            const stars = [1, 2, 3, 4, 5].map(star => {
+                const active = star <= rating;
+                if (!interactive) {
+                    return `<span class="${active ? 'text-yellow-300' : 'text-slate-600'}">${active ? '★' : '☆'}</span>`;
+                }
+                return `<button type="button" onclick="setGameMastery(${gameNum}, ${star}, event)" class="text-lg leading-none transition ${active ? 'text-yellow-300' : 'text-slate-500 hover:text-yellow-200'}" aria-label="第 ${gameNum} 關熟練度 ${star} 星">${active ? '★' : '☆'}</button>`;
+            }).join('');
+            return `<div class="flex items-center gap-0.5" title="熟練度：${gameMasteryLabel(rating)}">${stars}</div>`;
+        }
+
+        function setGameMastery(gameNum, rating, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            gameMastery['game' + gameNum] = rating;
+            renderCurrentGameMastery();
+            buildMenu();
+            if (typeof lsSave === 'function') lsSave();
+            showToast(`第 ${gameNum} 關熟練度：${gameMasteryLabel(rating)}`, 'success');
+        }
+
+        function renderCurrentGameMastery() {
+            const el = document.getElementById('game-mastery-control');
+            if (!el || !currentGameNum) return;
+            const rating = getGameMastery(currentGameNum);
+            el.classList.remove('hidden');
+            el.innerHTML = `<span class="text-xs text-slate-400 mr-1">熟練度</span>${renderGameMasteryStars(currentGameNum, true)}<span class="text-xs text-yellow-200 ml-1">${gameMasteryLabel(rating)}</span>`;
+        }
+
         function buildMenu() {
             const grid = document.getElementById('menu-grid');
             grid.innerHTML = gameList.map(g => {
@@ -4885,14 +4928,18 @@ function checkGame10() {
                 const bestBadge = best
                     ? `<span class="flex items-center gap-1 text-xs text-yellow-400 font-bold"><span>🏆</span><span>${best}</span></span>`
                     : `<span class="text-xs text-slate-600">尚未挑戰</span>`;
-                return `<button onclick="goToGame(${g.num})"
-                    class="glass-panel p-5 rounded-2xl text-left hover:border-blue-500 border border-transparent transition-all hover:shadow-lg hover:shadow-blue-500/10 group relative">
+                return `<div onclick="goToGame(${g.num})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToGame(${g.num});}" role="button" tabindex="0"
+                    class="glass-panel p-5 rounded-2xl text-left hover:border-blue-500 border border-transparent transition-all hover:shadow-lg hover:shadow-blue-500/10 group relative cursor-pointer">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-xs text-slate-500 font-bold">第 ${g.num} 關</span>
                         <div class="flex items-center gap-1.5">
                             ${bestBadge}
                             ${done ? '<span class="text-emerald-400 text-base">✅</span>' : ''}
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-xs text-slate-500">熟練度：${gameMasteryLabel(getGameMastery(g.num))}</span>
+                        ${renderGameMasteryStars(g.num, true)}
                     </div>
                     <div class="flex items-center gap-3 mb-3">
                         <div class="bg-blue-600/20 p-2 rounded-lg text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition">
@@ -4902,7 +4949,7 @@ function checkGame10() {
                     </div>
                     <p class="text-xs text-slate-400">${g.desc}</p>
                     ${g.num === 25 ? `<p class="text-xs text-slate-500 mt-1.5">題庫共 <span class="text-blue-400 font-bold">${(g25Bank.s.length + g25Bank.m.length).toLocaleString()}</span> 題・已答對 <span class="text-emerald-400 font-bold">${g25CorrectIds.size.toLocaleString()}</span> 題</p>` : ''}
-                </button>`;
+                </div>`;
             }).join('');
             safeCreateIcons();
         }
@@ -4953,6 +5000,7 @@ function checkGame10() {
             document.getElementById('screen-game').classList.remove('hidden');
             // 更新標題列
             document.getElementById('game-title-bar').textContent = `第 ${num} 關 — ${game.title}`;
+            renderCurrentGameMastery();
             // 切換遊戲 section
             document.querySelectorAll('.game-section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(game.tabId).classList.remove('hidden');
@@ -8405,6 +8453,7 @@ function checkGame10() {
                 const state = {};
                 // 1. completedGames
                 state.completedGames = JSON.parse(JSON.stringify(completedGames));
+                state.gameMastery = JSON.parse(JSON.stringify(gameMastery));
 
                 // 2. 各關卡 DOM 狀態
                 // Pattern A: data-placedId slots (games 1,2,4,5,10,13)
@@ -8559,6 +8608,9 @@ function checkGame10() {
                     Object.assign(completedGames, state.completedGames);
                     // 不在此呼叫 updateTrophyCount()，因為選單 DOM 尚未建立
                     // buildMenu() 在 window.onload 最後會正確渲染勾勾
+                }
+                if (state.gameMastery) {
+                    Object.assign(gameMastery, state.gameMastery);
                 }
                 if (state.bestTimes) {
                     Object.assign(bestTimes, state.bestTimes);
@@ -11372,11 +11424,440 @@ function exportSave() {
                         }
                     ]
                 }
+        ,
+        {
+                    title: '通風換氣、稀釋與排氣機延伸（PDF 41-45頁）',
+                    subgroups: [
+                        {
+                            subtitle: '（一）有機溶劑發散量換氣量',
+                            desc: '同一空間內使用 A、B 二種有機溶劑。A 發散量 1000 mg/min、容許濃度 90 mg/m³；B 發散量 100 mg/min、容許濃度 80 mg/m³。試計算 A、B 各自所需換氣量及同時使用時最小換氣量。另：A 物質 300 mg/min、12 mg/m³；B 物質 600 mg/min、35 mg/m³，試計算同時運作換氣量。',
+                            table: '',
+                            visualFormula: [
+                                { title: '換氣量', math: 'Q = W / C', note: 'W 為 mg/min，C 為 mg/m³，Q 為 m³/min。不同有機溶劑同時使用時，分別計算後加總。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p class="font-bold mb-2">📐 公式：</p>
+                                <p>Q = W ÷ C；同時使用種類相異之有機溶劑時，所需換氣量分別計算後合計。</p>
+                                <hr class="border-amber-700/50 my-2">
+                                <p class="font-bold text-emerald-400 mb-1">📋 解題步驟</p>
+                                <p>A：1000 ÷ 90 = <strong class="text-yellow-300">11.11 m³/min</strong></p>
+                                <p>B：100 ÷ 80 = <strong class="text-yellow-300">1.25 m³/min</strong></p>
+                                <p>A+B = 11.11 + 1.25 = <strong class="text-yellow-300">12.36 m³/min</strong></p>
+                                <p>第二題：300 ÷ 12 = 25.00；600 ÷ 35 = 17.14；合計 = <strong class="text-yellow-300">42.14 m³/min</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: 'A 有機溶劑換氣量（m³/min，小數點後2位）', answer: 11.11, tolerance: 0.03 },
+                                { label: 'B 有機溶劑換氣量（m³/min，小數點後2位）', answer: 1.25, tolerance: 0.02 },
+                                { label: 'A、B 同時使用最小換氣量（m³/min，小數點後2位）', answer: 12.36, tolerance: 0.03 },
+                                { label: '第二題 A、B 同時運作換氣量（m³/min，小數點後2位）', answer: 42.14, tolerance: 0.03 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（二）導管流率、風速與動壓',
+                            desc: '① 圓管導管直徑 0.2 m，平均風速 8.08 m/s，求空氣流率。② 局部排氣系統風速 16.6 m/s，求動壓。③ 動壓 13 mmH₂O，求風速。',
+                            table: '',
+                            visualFormula: [
+                                { title: '圓管流率', math: 'Q = V × πr²', note: '直徑 0.2 m，所以 r = 0.1 m。' },
+                                { title: '動壓與風速', math: 'V = 4.04√Pv', note: 'Pv 單位為 mmH₂O。反推 Pv 時兩邊平方。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p class="font-bold mb-2">📐 公式：</p>
+                                <p>Q = Vπr²；V = 4.04√Pv；Pv = (V/4.04)²</p>
+                                <hr class="border-amber-700/50 my-2">
+                                <p class="font-bold text-emerald-400 mb-1">📋 解題步驟</p>
+                                <p>Q = 8.08 × π × 0.1² = <strong class="text-yellow-300">0.25 m³/s</strong></p>
+                                <p>Pv = (16.6 ÷ 4.04)² = <strong class="text-yellow-300">16.88 mmH₂O</strong></p>
+                                <p>V = 4.04√13 = <strong class="text-yellow-300">14.57 m/s</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '圓管空氣流率（m³/s，小數點後2位）', answer: 0.25, tolerance: 0.01 },
+                                { label: '動壓 Pv（mmH₂O，小數點後2位）', answer: 16.88, tolerance: 0.05 },
+                                { label: '風速 V（m/s，小數點後2位）', answer: 14.57, tolerance: 0.05 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（三）排氣機定律：壓力、轉速與風量',
+                            desc: '① 排氣機壓力與轉動軸直徑平方成正比，若轉動軸直徑更換為 1.7 倍，壓力變為原來幾倍？② 排氣機迴轉數由 720 rpm 改為 900 rpm，原風量 800 m³/min、壓力 0.5 mmH₂O，求新壓力與新風量。',
+                            table: '',
+                            visualFormula: [
+                                { title: '排氣機定律', math: 'P₁/P₂ = (Q₁/Q₂)² = (N₁/N₂)² = (D₁/D₂)²', note: '風量與轉速成正比；壓力與轉速平方成正比。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p class="font-bold mb-2">📐 公式：</p>
+                                <p>P ∝ D²；P₂ = P₁ × (N₂/N₁)²；Q₂ = Q₁ × (N₂/N₁)</p>
+                                <hr class="border-amber-700/50 my-2">
+                                <p class="font-bold text-emerald-400 mb-1">📋 解題步驟</p>
+                                <p>直徑 1.7 倍：1.7² = <strong class="text-yellow-300">2.89 倍</strong></p>
+                                <p>新壓力 = 0.5 × (900/720)² = <strong class="text-yellow-300">0.78 mmH₂O</strong></p>
+                                <p>新風量 = 800 × (900/720) = <strong class="text-yellow-300">1000 m³/min</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '直徑改為1.7倍時壓力倍數', answer: 2.89, tolerance: 0.03 },
+                                { label: '新壓力（mmH₂O，小數點後2位）', answer: 0.78, tolerance: 0.03 },
+                                { label: '新風量（m³/min）', answer: 1000, tolerance: 1 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（四）換氣稀釋濃度與所需時間',
+                            desc: '① 氣積 600 m³，每小時換氣量 200 m³/hr，有害物濃度 600 ppm，求 3 小時後濃度。② 換氣率 1 hr⁻¹，原濃度 2100 mg/m³ 欲降至 300 mg/m³，求所需分鐘。③ 換氣率 2 hr⁻¹，原濃度 2700 mg/m³ 欲降至 300 mg/m³，求所需分鐘。',
+                            table: '',
+                            visualFormula: [
+                                { title: '稀釋通風', math: 'C = C₀e^(-Qt/V)', note: '若 N = Q/V，則 C = C₀e^(-Nt)。' },
+                                { title: '反推時間', math: 't = -ln(C/C₀) / N', note: 't 先算小時，再乘 60 換成分鐘。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p class="font-bold mb-2">📐 公式：</p>
+                                <p>C = C₀e^(-Qt/V)；t = -ln(C/C₀)/N</p>
+                                <hr class="border-amber-700/50 my-2">
+                                <p class="font-bold text-emerald-400 mb-1">📋 解題步驟</p>
+                                <p>C = 600 × e^(-(200/600)×3) = 600e⁻¹ = <strong class="text-yellow-300">220.73 ppm</strong></p>
+                                <p>t = -ln(300/2100)/1 = 1.95 hr = <strong class="text-yellow-300">117 min</strong></p>
+                                <p>t = -ln(300/2700)/2 = 1.0986 hr = <strong class="text-yellow-300">65.92 min</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '3小時後濃度（ppm，小數點後2位）', answer: 220.73, tolerance: 0.1 },
+                                { label: '換氣率1 hr⁻¹所需時間（分鐘，整數）', answer: 117, tolerance: 1 },
+                                { label: '換氣率2 hr⁻¹所需時間（分鐘，小數點後2位）', answer: 65.92, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        }
+                    ]
+                },
+        {
+                    title: '溫濕環境危害 WBGT（PDF 46-48頁）',
+                    subgroups: [
+                        {
+                            subtitle: '（一）室內無日曬 WBGT',
+                            desc: '某工作環境測得乾球溫度 31℃、自然濕球溫度 28℃、黑球溫度 35℃，為室內無日曬環境，求 WBGT。',
+                            table: '',
+                            visualFormula: [
+                                { title: '室內無日曬', math: 'WBGT = 0.7Tnwb + 0.3Tg', note: '室內無日曬不代入乾球溫度。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>WBGT = 0.7×28 + 0.3×35 = <strong class="text-yellow-300">30.1℃</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: 'WBGT（℃，小數點後1位）', answer: 30.1, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（二）室外有日曬與休息比例',
+                            desc: '戶外燒窯作業，有日曬。乾球 31℃、自然濕球 28℃、黑球 34℃。求 WBGT；若為中度工作，依表判斷每小時休息比例。',
+                            table: `<div class="overflow-x-auto mb-3"><table class="min-w-full text-xs text-center border border-slate-600 text-slate-200"><tr class="bg-slate-800"><th class="border border-slate-600 px-2 py-1">工作強度</th><th class="border border-slate-600 px-2 py-1">連續作業</th><th class="border border-slate-600 px-2 py-1">75%作業25%休息</th><th class="border border-slate-600 px-2 py-1">50%作業50%休息</th><th class="border border-slate-600 px-2 py-1">25%作業75%休息</th></tr><tr><td class="border border-slate-600 px-2 py-1">輕工作</td><td class="border border-slate-600 px-2 py-1">30.6</td><td class="border border-slate-600 px-2 py-1">31.4</td><td class="border border-slate-600 px-2 py-1">32.2</td><td class="border border-slate-600 px-2 py-1">33.0</td></tr><tr><td class="border border-slate-600 px-2 py-1">中度工作</td><td class="border border-slate-600 px-2 py-1">28.0</td><td class="border border-slate-600 px-2 py-1">29.4</td><td class="border border-slate-600 px-2 py-1">31.1</td><td class="border border-slate-600 px-2 py-1">32.6</td></tr><tr><td class="border border-slate-600 px-2 py-1">重工作</td><td class="border border-slate-600 px-2 py-1">25.9</td><td class="border border-slate-600 px-2 py-1">27.9</td><td class="border border-slate-600 px-2 py-1">30.0</td><td class="border border-slate-600 px-2 py-1">32.1</td></tr></table></div>`,
+                            visualFormula: [
+                                { title: '室外有日曬', math: 'WBGT = 0.7Tnwb + 0.2Tg + 0.1Tdb', note: '室外有日曬要納入乾球溫度。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>WBGT = 0.7×28 + 0.2×34 + 0.1×31 = <strong class="text-yellow-300">29.5℃</strong></p>
+                                <p>中度工作 29.5℃ 超過 75%作業25%休息之 29.4，落入下一格：<strong class="text-yellow-300">50%作業、50%休息</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: 'WBGT（℃，小數點後1位）', answer: 29.5, tolerance: 0.1 },
+                                { label: '每小時休息比例（%）', answer: 50, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（三）室外有日曬 WBGT 練習',
+                            desc: '① 乾球 26.2℃、自然濕球 25℃、黑球 26.9℃，求 WBGT。② 乾球 30℃、自然濕球 27℃、黑球 33℃，求 WBGT。',
+                            table: '',
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>① 0.7×25 + 0.2×26.9 + 0.1×26.2 = <strong class="text-yellow-300">25.5℃</strong></p>
+                                <p>② 0.7×27 + 0.2×33 + 0.1×30 = <strong class="text-yellow-300">28.5℃</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '第一題 WBGT（℃，小數點後1位）', answer: 25.5, tolerance: 0.1 },
+                                { label: '第二題 WBGT（℃，小數點後1位）', answer: 28.5, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（四）時間加權 WBGT 與熱分佈不均',
+                            desc: '① WBGT1=27℃、t1=10分；WBGT2=29℃、t2=20分；WBGT3=31℃、t3=30分，求 WBGTTWA。② 熱分佈不均，頭部 WBGT=31.5℃、腹部=27.6℃、腳踝=32.5℃，依 1:2:1 加權求平均。',
+                            table: '',
+                            visualFormula: [
+                                { title: '時間加權 WBGT', math: 'WBGTavg = Σ(WBGT × t) / Σt', note: '熱分佈不均時可依頭:腹:腳 = 1:2:1 加權。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>WBGTTWA = (27×10 + 29×20 + 31×30) ÷ 60 = <strong class="text-yellow-300">29.67℃</strong></p>
+                                <p>熱分佈平均 = (31.5×1 + 27.6×2 + 32.5×1) ÷ 4 = <strong class="text-yellow-300">29.8℃</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: 'WBGTTWA（℃，小數點後2位）', answer: 29.67, tolerance: 0.05 },
+                                { label: '熱分佈加權平均 WBGT（℃，小數點後1位）', answer: 29.8, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        }
+                    ]
+                },
+        {
+                    title: '機械防護、起重吊掛與堆高機（PDF 48-53頁）',
+                    subgroups: [
+                        {
+                            subtitle: '（一）研磨輪周速度',
+                            desc: '研磨輪最高使用周速度為 3000 m/min，直徑 250 mm，每分鐘轉速 3600 rpm。求實際周速度，並判斷是否符合安全要求。符合填 1，不符合填 0。',
+                            table: '',
+                            visualFormula: [
+                                { title: '周速度', math: 'V = πDN', note: 'D 要先由 mm 換成 m。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>V = π × 0.25 × 3600 = <strong class="text-yellow-300">2827 m/min</strong></p>
+                                <p>2827 &lt; 3000，所以符合安全要求。</p>
+                            </div>`,
+                            blanks: [
+                                { label: '研磨輪周速度（m/min，整數）', answer: 2827, tolerance: 2 },
+                                { label: '是否符合安全要求（符合填1）', answer: 1, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（二）雙手起動式安全距離',
+                            desc: '全轉式動力衝剪機械曲柄軸旋轉一週需 0.5 秒。① 離合器嚙合處數 2 個；② 離合器嚙合處數 10 個。求按鈕與危險界限間至少距離（公分）。',
+                            table: '',
+                            visualFormula: [
+                                { title: '最大時間', math: 'Tm = (1/2 + 1/n) × 週期時間', note: '週期時間要換成毫秒。' },
+                                { title: '安全距離', math: 'D = 1.6Tm', note: 'D 算出為 mm，再除以 10 換成 cm。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>0.5 秒 = 500 ms。</p>
+                                <p>n=2：Tm=(1/2+1/2)×500=500 ms；D=1.6×500=800 mm=<strong class="text-yellow-300">80 cm</strong></p>
+                                <p>n=10：Tm=(1/2+1/10)×500=300 ms；D=1.6×300=480 mm=<strong class="text-yellow-300">48 cm</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '嚙合處數2個之安全距離（cm）', answer: 80, tolerance: 0 },
+                                { label: '嚙合處數10個之安全距離（cm）', answer: 48, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（三）吊車接近界限與可抬高角度',
+                            desc: '① 吊車伸臂長 9.3√2 m，高度 9.3√2 m 處有 345 kV 特高壓，接近界限 2 m，求可抬高角度（採特別角）。② 吊車旋轉中心水平距離 9.3√2 m，高度 9.3√2 m 處有 34.5 kV，高壓電接近界限 0.5 m，求可抬高角度（採特別角）。',
+                            table: `<div class="overflow-x-auto mb-3"><table class="min-w-full text-xs text-center border border-slate-600 text-slate-200"><tr class="bg-slate-800"><th class="border border-slate-600 px-2 py-1">使用電壓 kV</th><th class="border border-slate-600 px-2 py-1">接近界限 cm</th></tr><tr><td class="border border-slate-600 px-2 py-1">超過33，66以下</td><td class="border border-slate-600 px-2 py-1">50</td></tr><tr><td class="border border-slate-600 px-2 py-1">超過220，345以下</td><td class="border border-slate-600 px-2 py-1">200</td></tr></table></div>`,
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>① sinβ = (9.3√2 - 2) ÷ 13.15 ≈ 0.85，接近 sin60°=0.87，所以採 <strong class="text-yellow-300">60°</strong></p>
+                                <p>② tanβ = (9.3√2 - 0.5) ÷ 13.15 ≈ 0.96，接近 tan45°=1，所以採 <strong class="text-yellow-300">45°</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '345kV 可抬高角度（度，特別角）', answer: 60, tolerance: 0 },
+                                { label: '34.5kV 可抬高角度（度，特別角）', answer: 45, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（四）鋼索、堆高機頂蓬與鏈條',
+                            desc: '① 斷裂荷重 3 噸鋼索，要吊 3 噸物品，安全係數 6，求至少幾條鋼索。② 鋼索 6×37，直徑 16 mm，求素線斷裂更換條數與直徑磨耗限度。③ 堆高機最大荷重 2 噸，頂蓬 1.6 m×1.5 m，求靜荷重；另最大荷重 1.1 噸，頂蓬 1.6 m×1.6 m，求靜荷重。④ 承載荷重 1 噸、貨叉後扶架等 200 kg，鏈條最大斷裂荷重。',
+                            table: '',
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>鋼索條數：6 = 3×條數 ÷ 3，所以條數 = <strong class="text-yellow-300">6</strong></p>
+                                <p>素線：6×37=222；222×10%=22.2，採無條件進位為 <strong class="text-yellow-300">23條</strong></p>
+                                <p>磨耗限度：16×(1-7%) = <strong class="text-yellow-300">14.88 mm</strong></p>
+                                <p>頂蓬靜荷重：4000/(160×150)=<strong class="text-yellow-300">0.17 kg/cm²</strong>；2200/(160×160)=<strong class="text-yellow-300">0.086 kg/cm²</strong></p>
+                                <p>鏈條斷裂荷重 = 5×(1000+200)=<strong class="text-yellow-300">6000 kg</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '至少鋼索條數', answer: 6, tolerance: 0 },
+                                { label: '素線斷裂更換條數', answer: 23, tolerance: 0 },
+                                { label: '直徑磨耗限度（mm，小數點後2位）', answer: 14.88, tolerance: 0.02 },
+                                { label: '2噸堆高機頂蓬靜荷重（kg/cm²，小數點後2位）', answer: 0.17, tolerance: 0.01 },
+                                { label: '1.1噸堆高機頂蓬靜荷重（kg/cm²，小數點後3位）', answer: 0.086, tolerance: 0.002 },
+                                { label: '鏈條最大斷裂荷重（kg）', answer: 6000, tolerance: 5 }
+                            ],
+                            solution: ''
+                        }
+                    ]
+                },
+        {
+                    title: '高壓氣體、施工架與照明（PDF 53-59頁）',
+                    subgroups: [
+                        {
+                            subtitle: '（一）高壓氣體儲槽安全距離與壓力換算',
+                            desc: 'A 球形槽直徑 16 m、B 球形槽直徑 8 m、C 臥型槽軸向直徑 4 m，求 A-B、A-C、B-C 安全距離。另：20℃時表壓 9.9 kg/cm² 之氫氣，換算 35℃表壓並判斷是否屬高壓氣體（是填1）。',
+                            table: '',
+                            visualFormula: [
+                                { title: '槽間距離', math: 'S = (D₁ + D₂) / 4', note: '且不得小於 1 m，取較大者。' },
+                                { title: '定容壓力溫度', math: 'P₁/P₂ = T₁/T₂', note: '表壓要先加 1.033 變成絕對壓力。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>A-B = (16+8)/4 = <strong class="text-yellow-300">6 m</strong>；A-C = (16+4)/4 = <strong class="text-yellow-300">5 m</strong>；B-C = (8+4)/4 = <strong class="text-yellow-300">3 m</strong></p>
+                                <p>(9.9+1.033)/(P₂+1.033) = 293.15/308.15，P₂ = <strong class="text-yellow-300">10.46 kg/cm²</strong>，屬高壓氣體。</p>
+                            </div>`,
+                            blanks: [
+                                { label: 'A-B 槽安全距離（m）', answer: 6, tolerance: 0 },
+                                { label: 'A-C 槽安全距離（m）', answer: 5, tolerance: 0 },
+                                { label: 'B-C 槽安全距離（m）', answer: 3, tolerance: 0 },
+                                { label: '35℃換算表壓（kg/cm²，小數點後2位）', answer: 10.46, tolerance: 0.05 },
+                                { label: '是否屬高壓氣體（是填1）', answer: 1, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（二）液氧溫度與冷凍能力',
+                            desc: '① 溫度 5℃、表壓 1.6 kg/cm² 之液氧，若表壓為 2 kg/cm²，求溫度。② 離心式壓縮機額定輸出 4 kW，求 1 日冷凍能力。③ 吸收式冷凍設備 1 小時入熱量 4000 仟卡，求 1 日冷凍能力。',
+                            table: '',
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>(1.6+1.033)/(2+1.033) = (273.15+5)/(273.15+X)，X = <strong class="text-yellow-300">47.26℃</strong></p>
+                                <p>離心式：4 ÷ 1.2 = <strong class="text-yellow-300">3.33 公噸</strong></p>
+                                <p>吸收式：4000 ÷ 6640 = <strong class="text-yellow-300">0.60 公噸</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '液氧表壓2 kg/cm²時溫度（℃，小數點後2位）', answer: 47.26, tolerance: 0.05 },
+                                { label: '離心式壓縮機1日冷凍能力（公噸，小數點後2位）', answer: 3.33, tolerance: 0.03 },
+                                { label: '吸收式冷凍設備1日冷凍能力（公噸，小數點後2位）', answer: 0.60, tolerance: 0.02 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（三）移動式施工架與壁連座',
+                            desc: '① 框式鋼管移動式施工架，每層高 1.8 m，共 4 層，腳輪 0.12 m，短邊寬 0.7 m。求頂層工作台高度與短邊方向輔助撐材水平距離。② 框式施工架高度 1.8 m、寬 1.7 m，行向 33 架、列向 22 架，求壁連座數。③ 單管施工架高度 1.8 m、寬 1.7 m，行向 33 架、列向 33 架，求壁連座數。',
+                            table: '',
+                            visualFormula: [
+                                { title: '移動式施工架', math: '15.4X ≥ H + 5 - 7.7W', note: 'H、W、X 均用公尺。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>H = 1.8×4 + 0.12 = <strong class="text-yellow-300">7.32 m</strong></p>
+                                <p>X = (7.32+5-7.7×0.7) ÷ 15.4 = <strong class="text-yellow-300">0.45 m</strong></p>
+                                <p>框式：垂直 1.8×33/9 = 6.6，進位 <strong class="text-yellow-300">7</strong>；水平 1.7×22/8 = 4.675，進位 <strong class="text-yellow-300">5</strong></p>
+                                <p>單管：垂直 1.8×33/5 = 11.88，進位 <strong class="text-yellow-300">12</strong>；水平 1.7×33/5.5 = 10.2，進位 <strong class="text-yellow-300">11</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '頂層工作台高度 H（m，小數點後2位）', answer: 7.32, tolerance: 0.02 },
+                                { label: '輔助撐材水平距離 X（m，小數點後2位）', answer: 0.45, tolerance: 0.02 },
+                                { label: '框式施工架行向壁連座（個）', answer: 7, tolerance: 0 },
+                                { label: '框式施工架列向壁連座（個）', answer: 5, tolerance: 0 },
+                                { label: '單管施工架行向壁連座（個）', answer: 12, tolerance: 0 },
+                                { label: '單管施工架列向壁連座（個）', answer: 11, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（四）四點法平均照度',
+                            desc: '① 2×2 測點照度如下：400、380、330 / 400、350、300 / 310、300、370。② 另一組照度如下：380、400、395、375 / 380、400、395、375 / 380、400、395、375。求平均照度。',
+                            table: `<div class="overflow-x-auto mb-3"><table class="min-w-full text-xs text-center border border-slate-600 text-slate-200"><tr class="bg-slate-800"><th class="border border-slate-600 px-2 py-1">題</th><th class="border border-slate-600 px-2 py-1">矩陣</th></tr><tr><td class="border border-slate-600 px-2 py-1">①</td><td class="border border-slate-600 px-2 py-1">400, 380, 330 / 400, 350, 300 / 310, 300, 370</td></tr><tr><td class="border border-slate-600 px-2 py-1">②</td><td class="border border-slate-600 px-2 py-1">380, 400, 395, 375 / 380, 400, 395, 375 / 380, 400, 395, 375</td></tr></table></div>`,
+                            visualFormula: [
+                                { title: '四點法', math: 'E = [Σ角點 + 2Σ邊點 + 4Σ內點] / (4mn)', note: '角點、邊點、內點權重不同。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>① E = [1410 + 2×1380 + 4×350] ÷ 16 = <strong class="text-yellow-300">348 Lux</strong></p>
+                                <p>② E = [1510 + 2×2345 + 4×795] ÷ 24 = <strong class="text-yellow-300">391 Lux</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '第一題平均照度（Lux，整數）', answer: 348, tolerance: 1 },
+                                { label: '第二題平均照度（Lux，整數）', answer: 391, tolerance: 1 }
+                            ],
+                            solution: ''
+                        }
+                    ]
+                },
+        {
+                    title: '電氣安全、電磁波與健康計算（PDF 59-65頁）',
+                    subgroups: [
+                        {
+                            subtitle: '（一）用電量與電流基本計算',
+                            desc: '① 110V、90W 燈泡使用 20 小時，求耗電量。② 110V、80W 燈泡使用 70 小時，求耗電量。③ 48W、110V 電器，求電流。④ 3hp、單相 220V 發電機，求電流。⑤ 20hp、三相 220V 空壓機，求電流。',
+                            table: '',
+                            visualFormula: [
+                                { title: '耗電量', math: 'kWh = W × hr / 1000', note: '1 度電 = 1 kWh。' },
+                                { title: '單相電流', math: 'I = P / V', note: 'hp 先換成 W，1hp = 746W。' },
+                                { title: '三相電流', math: 'I = P / (V√3)', note: '三相要多除以 √3。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>90×20/1000 = <strong class="text-yellow-300">1.8 度</strong>；80×70/1000 = <strong class="text-yellow-300">5.6 度</strong></p>
+                                <p>48/110 = <strong class="text-yellow-300">0.44 A</strong></p>
+                                <p>3hp = 2238W；2238/220 = <strong class="text-yellow-300">10.17 A</strong></p>
+                                <p>20hp = 14920W；14920/(220√3) = <strong class="text-yellow-300">39.15 A</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '90W使用20小時耗電量（度，小數點後1位）', answer: 1.8, tolerance: 0.1 },
+                                { label: '80W使用70小時耗電量（度，小數點後1位）', answer: 5.6, tolerance: 0.1 },
+                                { label: '48W電器電流（A，小數點後2位）', answer: 0.44, tolerance: 0.02 },
+                                { label: '3hp單相發電機電流（A，小數點後2位）', answer: 10.17, tolerance: 0.05 },
+                                { label: '20hp三相空壓機電流（A，小數點後2位）', answer: 39.15, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（二）延長線負載判斷',
+                            desc: '延長線為 110V、12A。電器用品如下表，請計算各電流與組合負載。若組合不超過 12A，符合安全標準填 1，超過填 0。',
+                            table: `<div class="overflow-x-auto mb-3"><table class="min-w-full text-xs text-center border border-slate-600 text-slate-200"><tr class="bg-slate-800"><th class="border border-slate-600 px-2 py-1">電器</th><th class="border border-slate-600 px-2 py-1">電壓</th><th class="border border-slate-600 px-2 py-1">功率</th></tr><tr><td class="border border-slate-600 px-2 py-1">日光燈</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">40W</td></tr><tr><td class="border border-slate-600 px-2 py-1">電視</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">300W</td></tr><tr><td class="border border-slate-600 px-2 py-1">洗衣機</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">400W</td></tr><tr><td class="border border-slate-600 px-2 py-1">冰箱</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">600W</td></tr><tr><td class="border border-slate-600 px-2 py-1">電鍋</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">800W</td></tr><tr><td class="border border-slate-600 px-2 py-1">吹風機</td><td class="border border-slate-600 px-2 py-1">110V</td><td class="border border-slate-600 px-2 py-1">700W</td></tr></table></div>`,
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>日光燈 0.36A、電視 2.73A、洗衣機 3.64A、冰箱 5.45A、電鍋 7.27A、吹風機 6.36A。</p>
+                                <p>A組日光燈+洗衣機 = 4.00A，符合；B組電視+洗衣機 = 6.37A，符合。</p>
+                                <p>C組冰箱+電鍋 = 12.72A，超過；D組電鍋+吹風機 = 13.63A，超過。</p>
+                            </div>`,
+                            blanks: [
+                                { label: '日光燈電流（A，小數點後2位）', answer: 0.36, tolerance: 0.02 },
+                                { label: '電視電流（A，小數點後2位）', answer: 2.73, tolerance: 0.03 },
+                                { label: '洗衣機電流（A，小數點後2位）', answer: 3.64, tolerance: 0.03 },
+                                { label: '冰箱電流（A，小數點後2位）', answer: 5.45, tolerance: 0.03 },
+                                { label: '電鍋電流（A，小數點後2位）', answer: 7.27, tolerance: 0.03 },
+                                { label: '吹風機電流（A，小數點後2位）', answer: 6.36, tolerance: 0.03 },
+                                { label: 'A組是否符合（符合填1）', answer: 1, tolerance: 0 },
+                                { label: 'B組是否符合（符合填1）', answer: 1, tolerance: 0 },
+                                { label: 'C組是否符合（符合填1，不符合填0）', answer: 0, tolerance: 0 },
+                                { label: 'D組是否符合（符合填1，不符合填0）', answer: 0, tolerance: 0 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（三）感電電流',
+                            desc: '① 電壓 240V、接地 150V，人體100Ω、衣服900Ω、鞋子1000Ω、接地10Ω，求流經人體電流（mA）。② 電壓 220V、接地150V，身體200Ω、手1000Ω、腳1300Ω、接地10Ω，求感電電流（mA）。③ 高空工作車對地電壓122kV，人員2500Ω、車體2000Ω、工具500Ω、接地100Ω、平台50MΩ，求安培與毫安。④ 高壓電對地161kV，人體1500Ω、工程車含吊臂1500Ω、工具400Ω、接地100Ω，求安培。',
+                            table: '',
+                            visualFormula: [
+                                { title: '歐姆定律', math: 'I = V / R', note: '串聯電阻相加；kV = 10³V，MΩ = 10⁶Ω，A 轉 mA 乘 1000。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>① I = (240-150)/(100+900+1000+10)=0.045A=<strong class="text-yellow-300">45mA</strong></p>
+                                <p>② I = (220-150)/(200+1000+1300+10)=0.0279A=<strong class="text-yellow-300">27.9mA</strong></p>
+                                <p>③ I = 122000/(2500+2000+500+100+50×10⁶)=<strong class="text-yellow-300">0.0024A = 2.4mA</strong></p>
+                                <p>④ I = 161000/(1500+1500+400+100)=<strong class="text-yellow-300">46A</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '第一題感電電流（mA）', answer: 45, tolerance: 0.5 },
+                                { label: '第二題感電電流（mA，小數點後1位）', answer: 27.9, tolerance: 0.2 },
+                                { label: '高空工作車感電電流（A，小數點後4位）', answer: 0.0024, tolerance: 0.0002 },
+                                { label: '高空工作車感電電流（mA，小數點後1位）', answer: 2.4, tolerance: 0.2 },
+                                { label: '工程車高壓電感電電流（A，整數）', answer: 46, tolerance: 1 }
+                            ],
+                            solution: ''
+                        },
+                        {
+                            subtitle: '（四）電磁波、BMI 與加班平均',
+                            desc: '① 距離雷達天線 1 m 測得電磁波通量密度 90 mW/cm²，距離 3 m 時為多少？② 勞工身高 170 cm、體重 65 kg，求 BMI。③ 發病前各月加班時數依序為 97、110、50、108、11、28 小時，求前2、前3、前4、前5、前6個月平均加班時數。',
+                            table: '',
+                            visualFormula: [
+                                { title: '距離平方反比', math: 'S₂ = S₁ × (r₁/r₂)²', note: '距離變 3 倍，通量密度變 1/9。' },
+                                { title: 'BMI', math: 'BMI = 體重(kg) / 身高(m)²', note: '170 cm = 1.7 m。' },
+                                { title: '任一期間月平均', math: '平均 = 累計加班時數 / 月數', note: '不是直接只算第6個月，也不是固定用6個月平均。' }
+                            ],
+                            hint: `<div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-4 mb-3 text-sm text-amber-200">
+                                <p>電磁波：90×(1/3)² = <strong class="text-yellow-300">10 mW/cm²</strong></p>
+                                <p>BMI = 65 ÷ 1.7² = <strong class="text-yellow-300">22.49</strong></p>
+                                <p>A=(97+110)/2=<strong class="text-yellow-300">103.5</strong>；B=(97+110+50)/3=<strong class="text-yellow-300">85.7</strong></p>
+                                <p>C=(97+110+50+108)/4=<strong class="text-yellow-300">91.3</strong>；D=376/5=<strong class="text-yellow-300">75.2</strong>；E=404/6=<strong class="text-yellow-300">67.3</strong></p>
+                            </div>`,
+                            blanks: [
+                                { label: '3m處電磁波通量密度（mW/cm²，整數）', answer: 10, tolerance: 0 },
+                                { label: 'BMI（小數點後2位）', answer: 22.49, tolerance: 0.05 },
+                                { label: 'A 前2個月平均加班時數（小數點後1位）', answer: 103.5, tolerance: 0.1 },
+                                { label: 'B 前3個月平均加班時數（小數點後1位）', answer: 85.7, tolerance: 0.1 },
+                                { label: 'C 前4個月平均加班時數（小數點後1位）', answer: 91.3, tolerance: 0.1 },
+                                { label: 'D 前5個月平均加班時數（小數點後1位）', answer: 75.2, tolerance: 0.1 },
+                                { label: 'E 前6個月平均加班時數（小數點後1位）', answer: 67.3, tolerance: 0.1 }
+                            ],
+                            solution: ''
+                        }
+                    ]
+                }
         ];
         let g29Current = 0;
         let g29ShowHint = {};
         let g29ShowNote = {};
         let g29Answers = {};
+        let g29Mastery = {};
 
         function g29AnswerStorageKey() {
             return 'safetyMasterG29Answers';
@@ -11396,6 +11877,58 @@ function exportSave() {
             } catch (e) {
                 console.warn('第29關作答紀錄儲存失敗:', e);
             }
+        }
+
+        function g29MasteryStorageKey() {
+            return 'safetyMasterG29Mastery';
+        }
+
+        function g29LoadMastery() {
+            try {
+                g29Mastery = JSON.parse(localStorage.getItem(g29MasteryStorageKey()) || '{}') || {};
+            } catch (e) {
+                g29Mastery = {};
+            }
+        }
+
+        function g29SaveMastery() {
+            try {
+                localStorage.setItem(g29MasteryStorageKey(), JSON.stringify(g29Mastery));
+            } catch (e) {
+                console.warn('第29關熟練度儲存失敗:', e);
+            }
+        }
+
+        function g29GetMastery(qIdx) {
+            const value = Number(g29Mastery[qIdx] || 0);
+            return Number.isFinite(value) ? Math.max(0, Math.min(5, value)) : 0;
+        }
+
+        function g29MasteryLabel(value) {
+            return ['未評分', '極不熟', '不熟', '普通', '熟練', '非常熟練'][value] || '未評分';
+        }
+
+        function g29RenderMastery(qIdx) {
+            const rating = g29GetMastery(qIdx);
+            const stars = [1, 2, 3, 4, 5].map(star => `
+                <button type="button" onclick="g29SetMastery(${qIdx}, ${star})" class="text-2xl leading-none transition ${star <= rating ? 'text-yellow-300' : 'text-slate-500 hover:text-yellow-200'}" aria-label="熟練度 ${star} 星">${star <= rating ? '★' : '☆'}</button>
+            `).join('');
+            return `
+                <div class="rounded-lg border border-slate-600/70 bg-slate-900/35 p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <div class="text-sm text-slate-400">本題熟練度</div>
+                        <div class="text-lg font-bold text-yellow-200">${g29MasteryLabel(rating)}</div>
+                    </div>
+                    <div class="flex items-center gap-1" aria-label="熟練度評分">${stars}</div>
+                </div>
+            `;
+        }
+
+        function g29SetMastery(qIdx, rating) {
+            g29Mastery[qIdx] = rating;
+            g29SaveMastery();
+            g29Render();
+            showToast(`已標記：${g29MasteryLabel(rating)}`, 'success');
         }
 
         function g29AnswerKey(qIdx, subgroupIdx, blankIdx) {
@@ -11608,6 +12141,7 @@ function exportSave() {
 
         function initGame29() {
             g29LoadAnswers();
+            g29LoadMastery();
             g29Current = 0;
             g29ShowHint = {};
             g29ShowNote = {};
@@ -11624,9 +12158,16 @@ function exportSave() {
             const total = g29Bank.length;
             document.getElementById('g29-qnum').innerText = g29Current + 1;
             document.getElementById('g29-qtotal').innerText = total;
-            document.getElementById('g29-progress').style.width = ((g29Current + 1) / total * 100) + '%';
+            const progress = document.getElementById('g29-progress');
+            const track = document.getElementById('g29-progress-track');
+            if (progress) progress.style.width = ((g29Current + 1) / total * 100) + '%';
+            if (track) {
+                track.setAttribute('aria-valuemin', '1');
+                track.setAttribute('aria-valuemax', String(total));
+                track.setAttribute('aria-valuenow', String(g29Current + 1));
+            }
 
-            let html = `<div class="space-y-6">`;
+            let html = `<div class="space-y-6">${g29RenderMastery(g29Current)}`;
 
             // 如果有 subgroups，渲染多個子題組
             if (q.subgroups && q.subgroups.length > 0) {
@@ -11666,7 +12207,7 @@ function exportSave() {
                     <button onclick="g29ToggleHint(0)" class="text-xs text-amber-400 hover:text-amber-300 mb-3 flex items-center gap-1 transition">
                         💡 <span id="g29-hint-label-0">${(g29ShowHint[0]) ? '隱藏公式提示' : '顯示公式提示'}</span>
                     </button>
-                    <div id="g29-hint-area-0" class="${(g29ShowHint[0]) ? '' : 'hidden'}">${g29RenderVisualFormula(q)}${q.hint || ''}</div>
+                    <div id="g29-hint-area-0" class="${(g29ShowHint[0]) ? '' : 'hidden'}">${g29RenderVisualFormula(q)}${q.hint || ''}${g29RenderNote(g29Current, 0)}</div>
                     <div class="space-y-3 mt-2">`;
                 q.blanks.forEach((b, i) => {
                     const savedValue = g29EscapeText(g29GetSavedAnswer(g29Current, 0, i));
@@ -11697,13 +12238,43 @@ function exportSave() {
             if (label) label.innerText = g29ShowHint[si] ? '隱藏公式提示' : '顯示公式提示';
         }
 
+        function g29GoTo(index) {
+            const next = Math.max(0, Math.min(g29Bank.length - 1, Number(index) || 0));
+            if (next === g29Current) return;
+            g29Current = next;
+            g29ShowHint = {};
+            g29ShowNote = {};
+            g29Render();
+        }
+
+        function g29ProgressJump(event) {
+            const track = event.currentTarget;
+            const rect = track.getBoundingClientRect();
+            const ratio = rect.width ? (event.clientX - rect.left) / rect.width : 0;
+            g29GoTo(Math.floor(Math.max(0, Math.min(0.999999, ratio)) * g29Bank.length));
+        }
+
+        function g29ProgressKey(event) {
+            const keyMap = {
+                ArrowLeft: g29Current - 1,
+                ArrowRight: g29Current + 1,
+                PageUp: g29Current - 5,
+                PageDown: g29Current + 5,
+                Home: 0,
+                End: g29Bank.length - 1
+            };
+            if (!(event.key in keyMap)) return;
+            event.preventDefault();
+            g29GoTo(keyMap[event.key]);
+        }
+
         function g29Prev() {
-            if (g29Current > 0) { g29Current--; g29ShowHint = {}; g29Render(); }
+            if (g29Current > 0) g29GoTo(g29Current - 1);
             else showToast('已是第一題！', 'info');
         }
 
         function g29Next() {
-            if (g29Current < g29Bank.length - 1) { g29Current++; g29ShowHint = {}; g29Render(); }
+            if (g29Current < g29Bank.length - 1) g29GoTo(g29Current + 1);
             else showToast('已是最後一題！', 'info');
         }
 
@@ -11774,15 +12345,22 @@ function exportSave() {
         // ===== 小算盤邏輯 =====
         let calcExpr = '';
         let calcAnsVal = 0;
+        let calcJustEvaluated = false;
         function calcInput(val) {
+            if (calcJustEvaluated && /^[0-9.]$/.test(val)) {
+                calcExpr = '';
+            }
+            calcJustEvaluated = false;
             calcExpr += val;
             document.getElementById('calc-display').innerText = calcExpr || '0';
         }
         function calcDel() {
+            calcJustEvaluated = false;
             calcExpr = calcExpr.slice(0, -1);
             document.getElementById('calc-display').innerText = calcExpr || '0';
         }
         function calcClear() {
+            calcJustEvaluated = false;
             calcExpr = '';
             document.getElementById('calc-display').innerText = '0';
         }
@@ -11792,20 +12370,31 @@ function exportSave() {
             if (n === 0 || n === 1) return 1;
             let r = 1; for (let i = 2; i <= n; i++) r *= i; return r;
         }
+        function calcPrepareExpression(expr) {
+            return expr
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/−/g, '-')
+                .replace(/(\d+(?:\.\d+)?|\.\d+|\))%/g, '($1/100)');
+        }
         function calcEval() {
             try {
-                let expr = calcExpr.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+                let expr = calcPrepareExpression(calcExpr);
                 const result = Function('"use strict"; const Math=window.Math, factorial=window.factorial; return (' + expr + ')')();
                 calcAnsVal = result;
                 const disp = Number.isInteger(result) ? result : parseFloat(result.toFixed(10));
                 document.getElementById('calc-display').innerText = disp;
                 calcExpr = String(disp);
+                calcJustEvaluated = true;
             } catch(e) {
                 document.getElementById('calc-display').innerText = 'Error';
                 calcExpr = '';
+                calcJustEvaluated = false;
             }
         }
         function calcAns() {
+            if (calcJustEvaluated) calcExpr = '';
+            calcJustEvaluated = false;
             calcExpr += String(calcAnsVal);
             document.getElementById('calc-display').innerText = calcExpr;
         }
