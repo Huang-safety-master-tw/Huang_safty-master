@@ -1614,109 +1614,82 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
                     <!-- Flowchart -->
                     <div class="lg:col-span-2 bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto">
-                        <div class="min-w-[560px]">
-                            <!-- Root node -->
-                            <div class="flex justify-center mb-1">
-                                <div class="bg-slate-700 border border-slate-500 px-4 py-2 rounded text-sm font-bold text-white text-center w-24">危害</div>
+                        <div class="relative mx-auto w-[920px] h-[590px] text-slate-100">
+                            <div class="absolute left-[410px] top-[0px] w-[100px] rounded border border-slate-500 bg-slate-700 px-3 py-2 text-center text-sm font-bold">危害</div>
+
+                            <div class="absolute left-[230px] top-[56px] h-px w-[460px] bg-slate-600"></div>
+                            <div class="absolute left-[460px] top-[36px] h-[20px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[230px] top-[56px] h-[34px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[690px] top-[56px] h-[34px] w-px bg-slate-600"></div>
+
+                            <div class="resp-slot absolute left-[170px] top-[90px] flex min-h-[46px] w-[120px] cursor-pointer items-center justify-center rounded border-2 border-dashed border-teal-500 bg-slate-900/60 px-2 text-center text-xs font-bold"
+                                 id="resp-slot-A" data-answer="缺氧" onclick="placeResp(this)" ondragover="allowRespDrop(event)" ondrop="dropResp(event, this)">A</div>
+                            <div class="absolute left-[630px] top-[90px] w-[120px] rounded border border-slate-500 bg-slate-700 px-3 py-2 text-center text-xs font-bold text-white">有害物</div>
+
+                            <div class="absolute left-[230px] top-[136px] h-[54px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[110px] top-[190px] h-px w-[240px] bg-slate-600"></div>
+                            <div class="absolute left-[110px] top-[190px] h-[28px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[350px] top-[190px] h-[28px] w-px bg-slate-600"></div>
+
+                            <div class="absolute left-[50px] top-[218px] w-[130px] rounded border border-slate-600 bg-slate-800 px-2 py-2 text-center text-[11px] leading-tight text-slate-200">
+                                <span class="resp-slot inline-block min-w-[8rem] cursor-pointer rounded border-b border-teal-500 px-1 text-center font-bold text-teal-300 hover:bg-teal-900/20"
+                                      id="resp-slot-D" data-answer="正壓或壓力需求型輸氣管" onclick="placeResp(this)" ondragover="allowRespDrop(event)" ondrop="dropResp(event, this)">D</span><br>面罩＋輔助自攜式呼吸器
                             </div>
-                            <!-- Connector -->
-                            <div class="flex justify-center gap-40 mb-1">
-                                <div class="w-px h-4 bg-slate-600 mx-auto" style="margin-left:calc(50% - 80px)"></div>
+                            <div class="absolute left-[285px] top-[218px] w-[130px] rounded border border-slate-600 bg-slate-800 px-2 py-2 text-center text-[11px] leading-tight text-slate-200">正壓自攜式<br>呼吸器</div>
+
+                            <div class="absolute left-[690px] top-[136px] h-[54px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[545px] top-[190px] h-px w-[290px] bg-slate-600"></div>
+                            <div class="absolute left-[545px] top-[190px] h-[28px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[835px] top-[190px] h-[28px] w-px bg-slate-600"></div>
+
+                            <div class="absolute left-[460px] top-[218px] w-[170px] rounded border border-slate-500 bg-slate-700 px-2 py-2 text-center text-[11px] font-bold leading-tight text-white">
+                                對生命、健康造成<br>
+                                <span class="resp-slot inline-block min-w-[4rem] cursor-pointer rounded border-b border-teal-500 px-1 text-center font-bold text-teal-300 hover:bg-teal-900/20"
+                                      id="resp-slot-B" data-answer="立即致危濃度" onclick="placeResp(this)" ondragover="allowRespDrop(event)" ondrop="dropResp(event, this)">B</span>
+                                或
+                                <span class="resp-slot inline-block min-w-[4rem] cursor-pointer rounded border-b border-teal-500 px-1 text-center font-bold text-teal-300 hover:bg-teal-900/20"
+                                      id="resp-slot-C" data-answer="緊急狀況" onclick="placeResp(this)" ondragover="allowRespDrop(event)" ondrop="dropResp(event, this)">C</span>
                             </div>
-                            <!-- Level 1: A and 有害物 -->
-                            <div class="flex items-start justify-center gap-16 mb-1 relative">
-                                <div class="flex flex-col items-center">
-                                    <div class="w-px h-4 bg-slate-600"></div>
-                                    <div class="resp-slot text-xs w-32 text-center min-h-[44px] flex items-center justify-center rounded border-2 border-dashed border-teal-500 bg-slate-900/60 cursor-pointer font-bold"
-                                         id="resp-slot-A" data-answer="缺氧" onclick="placeResp(this)">A</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="w-px h-4 bg-slate-600"></div>
-                                    <div class="bg-slate-700 border border-slate-500 px-3 py-2 rounded text-xs font-bold text-white text-center w-32">有害物</div>
-                                </div>
-                            </div>
-                            <!-- Horizontal connector for 有害物 children -->
-                            <div class="flex justify-end pr-8 mb-1">
-                                <div class="flex gap-8 items-start" style="margin-right:16px">
-                                    <div class="flex flex-col items-center" style="margin-left:32px">
-                                        <div class="w-px h-4 bg-slate-600"></div>
-                                    </div>
-                                    <div class="flex flex-col items-center" style="margin-left:32px">
-                                        <div class="w-px h-4 bg-slate-600"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Level 2 under 有害物: 對生命健康造成B或C / 非對生命健康造成B -->
-                            <div class="flex items-start justify-center gap-6 mb-1">
-                                <!-- Left branch from A -->
-                                <div class="flex flex-col items-center" style="margin-top:0">
-                                    <div class="bg-slate-800 border border-slate-600 px-2 py-1.5 rounded text-[10px] text-slate-300 text-center w-28 leading-tight">D面罩＋輔助自攜式呼吸器<br><span class="text-teal-400 text-[9px]">（A分支）</span></div>
-                                </div>
-                                <div class="flex flex-col items-center" style="margin-top:0">
-                                    <div class="bg-slate-800 border border-slate-600 px-2 py-1.5 rounded text-[10px] text-slate-300 text-center w-28 leading-tight">正壓自攜式呼吸器<br><span class="text-teal-400 text-[9px]">（A分支）</span></div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="resp-slot text-[10px] w-36 text-center min-h-[44px] flex items-center justify-center rounded border-2 border-dashed border-teal-500 bg-slate-900/60 cursor-pointer font-bold leading-tight"
-                                         id="resp-slot-BC" data-answer="對生命、健康造成B或C" onclick="placeResp(this)">對生命、健康造成B或C</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-slate-700 border border-slate-500 px-2 py-2 rounded text-[10px] font-bold text-white text-center w-36 leading-tight">非對生命、健康造成B</div>
-                                </div>
-                            </div>
-                            <!-- Note about B and C -->
-                            <div class="flex justify-center gap-4 mb-3 mt-1">
-                                <div class="text-[10px] text-slate-500 text-center">B =
-                                    <span class="resp-slot inline-block min-w-[4rem] text-center font-bold text-teal-300 border-b border-teal-500 cursor-pointer px-1 hover:bg-teal-900/20 rounded"
-                                          id="resp-slot-B" data-answer="立即致危濃度" onclick="placeResp(this)">B</span>
-                                    ，C =
-                                    <span class="resp-slot inline-block min-w-[4rem] text-center font-bold text-teal-300 border-b border-teal-500 cursor-pointer px-1 hover:bg-teal-900/20 rounded"
-                                          id="resp-slot-C" data-answer="緊急狀況" onclick="placeResp(this)">C</span>
-                                </div>
-                            </div>
-                            <!-- Level 3: 粒狀物 / E / 氣狀物 -->
-                            <div class="flex items-start justify-center gap-4 mb-1">
-                                <div class="flex flex-col items-center">
-                                    <div class="w-px h-4 bg-slate-600"></div>
-                                    <div class="bg-slate-700 border border-slate-500 px-2 py-1.5 rounded text-xs font-bold text-white text-center w-24">粒狀物</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="w-px h-4 bg-slate-600"></div>
-                                    <div class="resp-slot text-xs w-28 text-center min-h-[36px] flex items-center justify-center rounded border-2 border-dashed border-teal-500 bg-slate-900/60 cursor-pointer font-bold"
-                                         id="resp-slot-E" data-answer="粒狀物＋氣狀物" onclick="placeResp(this)">E</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="w-px h-4 bg-slate-600"></div>
-                                    <div class="bg-slate-700 border border-slate-500 px-2 py-1.5 rounded text-xs font-bold text-white text-center w-24">氣狀物</div>
-                                </div>
-                            </div>
-                            <!-- Level 4: equipment types -->
-                            <div class="flex items-start justify-center gap-2 mb-1 mt-2">
-                                <div class="bg-slate-800 border border-slate-600 px-1.5 py-1 rounded text-[9px] text-slate-300 text-center w-24 leading-tight">輸氣管面罩/<br>淨氣式複合</div>
-                                <div class="bg-slate-800 border border-slate-600 px-1.5 py-1 rounded text-[9px] text-slate-300 text-center w-20 leading-tight">輸氣管<br>面罩</div>
-                                <div class="bg-slate-800 border border-slate-600 px-1.5 py-1 rounded text-[9px] text-slate-300 text-center w-24 leading-tight">輸氣管面罩/<br>淨氣式複合</div>
-                                <div class="bg-slate-800 border border-slate-600 px-1.5 py-1 rounded text-[9px] text-slate-300 text-center w-20 leading-tight">輸氣管<br>面罩</div>
-                            </div>
-                            <!-- Level 5: 淨氣式 -->
-                            <div class="flex items-start justify-center gap-2 mb-1 mt-1">
-                                <div class="bg-slate-800/50 px-1.5 py-1 rounded text-[9px] text-slate-400 text-center w-24">淨氣式</div>
-                                <div class="w-20"></div>
-                                <div class="bg-slate-800/50 px-1.5 py-1 rounded text-[9px] text-slate-400 text-center w-24">淨氣式</div>
-                                <div class="w-20"></div>
-                            </div>
-                            <!-- Level 6: final equipment -->
-                            <div class="flex items-start justify-center gap-2 mt-1">
-                                <div class="bg-slate-900 border border-slate-700 px-1.5 py-1 rounded text-[9px] text-teal-300 text-center w-20 leading-tight">防塵面具</div>
-                                <div class="bg-slate-900 border border-slate-700 px-1.5 py-1 rounded text-[9px] text-teal-300 text-center w-24 leading-tight">動力淨氣式<br>防塵面具</div>
-                                <div class="bg-slate-900 border border-slate-700 px-1.5 py-1 rounded text-[9px] text-teal-300 text-center w-24 leading-tight">防塵/防毒<br>兼用式面具</div>
-                                <div class="bg-slate-900 border border-slate-700 px-1.5 py-1 rounded text-[9px] text-teal-300 text-center w-24 leading-tight">動力淨氣式<br>面具</div>
-                                <div class="bg-slate-900 border border-slate-700 px-1.5 py-1 rounded text-[9px] text-teal-300 text-center w-20 leading-tight">防毒面具</div>
-                            </div>
-                            <!-- D note -->
-                            <div class="mt-3 text-[10px] text-slate-500 text-center">
-                                D =
-                                <span class="resp-slot inline-block min-w-[8rem] text-center font-bold text-teal-300 border-b border-teal-500 cursor-pointer px-1 hover:bg-teal-900/20 rounded"
-                                      id="resp-slot-D" data-answer="正壓或壓力需求型輸氣管" onclick="placeResp(this)">D</span>
-                            </div>
+                            <div class="absolute left-[760px] top-[218px] w-[150px] rounded border border-slate-500 bg-slate-700 px-2 py-2 text-center text-[11px] font-bold leading-tight text-white">非對生命、<br>健康造成B</div>
+
+                            <div class="absolute left-[545px] top-[268px] h-[42px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[545px] top-[310px] h-px w-[290px] bg-slate-600"></div>
+                            <div class="absolute left-[545px] top-[310px] h-[28px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[690px] top-[310px] h-[28px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[835px] top-[268px] h-[70px] w-px bg-slate-600"></div>
+
+                            <div class="absolute left-[498px] top-[338px] w-[94px] rounded border border-slate-500 bg-slate-700 px-2 py-2 text-center text-xs font-bold text-white">粒狀物</div>
+                            <div class="resp-slot absolute left-[635px] top-[338px] flex min-h-[42px] w-[110px] cursor-pointer items-center justify-center rounded border-2 border-dashed border-teal-500 bg-slate-900/60 px-2 text-center text-xs font-bold"
+                                 id="resp-slot-E" data-answer="粒狀物＋氣狀物" onclick="placeResp(this)" ondragover="allowRespDrop(event)" ondrop="dropResp(event, this)">E</div>
+                            <div class="absolute left-[788px] top-[338px] w-[94px] rounded border border-slate-500 bg-slate-700 px-2 py-2 text-center text-xs font-bold text-white">氣狀物</div>
+
+                            <div class="absolute left-[545px] top-[380px] h-[38px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[690px] top-[380px] h-[38px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[835px] top-[380px] h-[38px] w-px bg-slate-600"></div>
+
+                            <div class="absolute left-[492px] top-[418px] w-[106px] rounded border border-slate-600 bg-slate-800 px-2 py-1.5 text-center text-[10px] leading-tight text-slate-200">輸氣管面罩／<br>淨氣式複合</div>
+                            <div class="absolute left-[650px] top-[418px] w-[80px] rounded border border-slate-600 bg-slate-800 px-2 py-1.5 text-center text-[10px] leading-tight text-slate-200">輸氣管<br>面罩</div>
+                            <div class="absolute left-[782px] top-[418px] w-[106px] rounded border border-slate-600 bg-slate-800 px-2 py-1.5 text-center text-[10px] leading-tight text-slate-200">輸氣管面罩／<br>淨氣式複合</div>
+
+                            <div class="absolute left-[545px] top-[454px] h-[26px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[835px] top-[454px] h-[26px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[495px] top-[480px] h-px w-[100px] bg-slate-600"></div>
+                            <div class="absolute left-[785px] top-[480px] h-px w-[100px] bg-slate-600"></div>
+                            <div class="absolute left-[495px] top-[480px] h-[24px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[595px] top-[480px] h-[24px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[785px] top-[480px] h-[24px] w-px bg-slate-600"></div>
+                            <div class="absolute left-[885px] top-[480px] h-[24px] w-px bg-slate-600"></div>
+
+                            <div class="absolute left-[505px] top-[464px] w-[80px] rounded bg-slate-800/60 px-2 py-1 text-center text-[10px] text-slate-300">淨氣式</div>
+                            <div class="absolute left-[795px] top-[464px] w-[80px] rounded bg-slate-800/60 px-2 py-1 text-center text-[10px] text-slate-300">淨氣式</div>
+
+                            <div class="absolute left-[450px] top-[504px] w-[90px] rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-center text-[10px] leading-tight text-teal-300">防塵面具</div>
+                            <div class="absolute left-[550px] top-[504px] w-[100px] rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-center text-[10px] leading-tight text-teal-300">動力淨氣式<br>防塵面具</div>
+                            <div class="absolute left-[730px] top-[504px] w-[110px] rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-center text-[10px] leading-tight text-teal-300">動力淨氣式<br>面具</div>
+                            <div class="absolute left-[850px] top-[504px] w-[70px] rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-center text-[10px] leading-tight text-teal-300">防毒面具</div>
+
+                            <div class="absolute left-[610px] top-[512px] h-px w-[130px] bg-slate-600"></div>
+                            <div class="absolute left-[675px] top-[464px] w-[118px] rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-center text-[10px] leading-tight text-teal-300">防塵／防毒<br>兼用式面具</div>
                         </div>
                     </div>
 
@@ -5918,7 +5891,13 @@ function checkGame10() {
                 card.className = 'resp-card bg-slate-800 hover:bg-teal-900/40 text-white text-xs px-3 py-2.5 rounded-lg border border-slate-700 cursor-pointer transition font-bold';
                 card.dataset.answer = item.answer;
                 card.dataset.id = item.id;
-                card.innerText = item.id + '：' + item.answer;
+                card.innerText = item.answer;
+                card.draggable = true;
+                card.ondragstart = (ev) => {
+                    g15Selected = card;
+                    ev.dataTransfer.setData('text/plain', item.answer);
+                    ev.dataTransfer.effectAllowed = 'move';
+                };
                 card.onclick = () => selectRespCard(card);
                 pool.appendChild(card);
             });
@@ -5966,12 +5945,38 @@ function checkGame10() {
             slot.innerText = g15Selected.dataset.answer;
             slot.dataset.filled = g15Selected.dataset.answer;
             if (slot.tagName === 'SPAN') {
-                slot.className = 'resp-slot inline-block min-w-[4rem] text-center font-bold text-white border-b border-teal-400 cursor-pointer px-1 bg-teal-900/20 rounded';
+                const widthClass = slot.id === 'resp-slot-D' ? 'min-w-[8rem]' : 'min-w-[4rem]';
+                slot.className = `resp-slot inline-block ${widthClass} text-center font-bold text-white border-b border-teal-400 cursor-pointer px-1 bg-teal-900/20 rounded`;
             } else {
                 slot.classList.remove('border-dashed');
                 slot.classList.add('border-teal-400', 'text-white', 'bg-teal-900/20');
             }
                     setTimeout(lsSave, 150);
+        }
+
+        function allowRespDrop(ev) {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'move';
+        }
+
+        function dropResp(ev, slot) {
+            ev.preventDefault();
+            const answer = ev.dataTransfer.getData('text/plain') || (g15Selected ? g15Selected.dataset.answer : '');
+            if (!answer) return;
+            triggerTimer();
+            soundClick();
+            slot.innerText = answer;
+            slot.dataset.filled = answer;
+            if (slot.tagName === 'SPAN') {
+                const widthClass = slot.id === 'resp-slot-D' ? 'min-w-[8rem]' : 'min-w-[4rem]';
+                slot.className = `resp-slot inline-block ${widthClass} text-center font-bold text-white border-b border-teal-400 cursor-pointer px-1 bg-teal-900/20 rounded`;
+            } else {
+                slot.classList.remove('border-dashed');
+                slot.classList.add('border-teal-400', 'text-white', 'bg-teal-900/20');
+            }
+            document.querySelectorAll('.resp-card').forEach(c => c.classList.remove('ring-2', 'ring-teal-400', 'bg-teal-900/60'));
+            g15Selected = null;
+            setTimeout(lsSave, 150);
         }
 
         function checkGame15() {
@@ -5984,7 +5989,8 @@ function checkGame10() {
                 if (filled === ans) {
                     correct++;
                     if (slot.tagName === 'SPAN') {
-                        slot.className = 'resp-slot inline-block min-w-[4rem] text-center font-bold border-b cursor-pointer px-1 rounded text-emerald-300 border-emerald-400 bg-emerald-950/40';
+                        const widthClass = slot.id === 'resp-slot-D' ? 'min-w-[8rem]' : 'min-w-[4rem]';
+                        slot.className = `resp-slot inline-block ${widthClass} text-center font-bold border-b cursor-pointer px-1 rounded text-emerald-300 border-emerald-400 bg-emerald-950/40`;
                     } else {
                         slot.className = slot.className.replace(/border-dashed|border-teal-500|bg-slate-900\/60/g, '');
                         slot.classList.add('border-emerald-500', 'bg-emerald-950/30', 'text-emerald-300');
@@ -5992,7 +5998,8 @@ function checkGame10() {
                     }
                 } else {
                     if (slot.tagName === 'SPAN') {
-                        slot.className = 'resp-slot inline-block min-w-[4rem] text-center font-bold border-b cursor-pointer px-1 rounded text-rose-300 border-rose-500 bg-rose-950/40';
+                        const widthClass = slot.id === 'resp-slot-D' ? 'min-w-[8rem]' : 'min-w-[4rem]';
+                        slot.className = `resp-slot inline-block ${widthClass} text-center font-bold border-b cursor-pointer px-1 rounded text-rose-300 border-rose-500 bg-rose-950/40`;
                     } else {
                         slot.classList.add('border-rose-500', 'bg-rose-950/30', 'text-rose-300');
                         slot.classList.remove('border-emerald-500', 'bg-emerald-950/30', 'text-emerald-300');
@@ -7705,15 +7712,25 @@ function checkGame10() {
         }
 
         function showAnswer15() {
-            _showAnswerPanel('第15關：呼吸防護具選用流程', `
-                <div class="space-y-2 text-xs">
-                    <div>A → <strong class="text-teal-300">缺氧</strong></div>
-                    <div>B → <strong class="text-teal-300">立即致危濃度（IDLH）</strong></div>
-                    <div>C → <strong class="text-teal-300">緊急狀況</strong></div>
-                    <div>D → <strong class="text-teal-300">正壓或壓力需求型輸氣管</strong></div>
-                    <div>E（BC分支）→ <strong class="text-teal-300">對生命、健康造成B或C</strong></div>
-                    <div>E（粒/氣狀物分支）→ <strong class="text-teal-300">粒狀物＋氣狀物</strong></div>
-                </div>`, 'teal');
+            document.querySelectorAll('.resp-slot').forEach(slot => {
+                const ans = (slot.dataset.answer || '').trim();
+                if (!ans) return;
+                slot.innerText = ans;
+                slot.dataset.filled = ans;
+                if (slot.tagName === 'SPAN') {
+                    const widthClass = slot.id === 'resp-slot-D' ? 'min-w-[8rem]' : 'min-w-[4rem]';
+                    slot.className = `resp-slot inline-block ${widthClass} text-center font-bold border-b cursor-pointer px-1 rounded text-sky-300 border-sky-400 bg-sky-950/40`;
+                } else {
+                    slot.classList.remove('border-dashed', 'border-teal-500', 'border-rose-500', 'bg-slate-900/60', 'bg-rose-950/30', 'text-rose-300');
+                    slot.classList.add('border-sky-400', 'bg-sky-950/40', 'text-sky-300');
+                }
+            });
+            g15Selected = null;
+            document.querySelectorAll('.resp-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-teal-400', 'bg-teal-900/60');
+            });
+            setTimeout(lsSave, 150);
+            showToast('✅ 第15關解答已直接填入流程圖', 'info');
         }
 
         function showAnswer16() {
@@ -10116,7 +10133,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '職業災害統計進階（PDF前20頁）',
+                    title: '職業災害統計進階',
                     subgroups: [
                         {
                             subtitle: '（一）永久部分失能與暫時全失能',
@@ -10381,7 +10398,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '噪音危害進階（PDF前20頁）',
+                    title: '噪音危害進階',
                     subgroups: [
                         {
                             subtitle: '（一）穩定噪音＋變動噪音＋TWA',
@@ -10512,7 +10529,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '作業環境危害計算（PDF前20頁）',
+                    title: '作業環境危害計算',
                     subgroups: [
                         {
                             subtitle: '（一）三物質時量平均與相加效應',
@@ -10601,7 +10618,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '有害物濃度與採樣計算（PDF 21-24頁）',
+                    title: '有害物濃度與採樣計算',
                     subgroups: [
                         {
                             subtitle: '（一）穀粉粉塵採樣濃度',
@@ -10736,7 +10753,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '口罩過濾效率計算（PDF 23頁）',
+                    title: '口罩過濾效率計算',
                     subgroups: [
                         {
                             subtitle: '（一）三層濾材總過濾效率',
@@ -10779,7 +10796,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '爆炸下限 LEL 與可燃性氣體（PDF 25-26頁）',
+                    title: '爆炸下限 LEL 與可燃性氣體',
                     subgroups: [
                         {
                             subtitle: '（一）LEL 計讀值換算',
@@ -10869,7 +10886,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '靜電能量與氣體基本換算（PDF 27-28頁）',
+                    title: '靜電能量與氣體基本換算',
                     subgroups: [
                         {
                             subtitle: '（一）靜電放電能量',
@@ -10926,7 +10943,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '通風換氣與空氣稀釋計算（PDF 29-40頁）',
+                    title: '通風換氣與空氣稀釋計算',
                     subgroups: [
                         {
                             subtitle: '（一）每人新鮮空氣量換算換氣次數',
@@ -11071,7 +11088,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '局部排氣壓力、風速與流率（PDF 29-40頁）',
+                    title: '局部排氣壓力、風速與流率',
                     subgroups: [
                         {
                             subtitle: '（一）風扇上下游壓力表反推',
@@ -11190,7 +11207,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '氣罩捕捉風速與風量比例（PDF 31-40頁）',
+                    title: '氣罩捕捉風速與風量比例',
                     subgroups: [
                         {
                             subtitle: '（一）外裝式氣罩距離 1 m',
@@ -11298,7 +11315,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '防爆通風、有機溶劑與排氣機定律（PDF 29-40頁）',
+                    title: '防爆通風、有機溶劑與排氣機定律',
                     subgroups: [
                         {
                             subtitle: '（一）正己烷防爆必要換氣量',
@@ -11426,7 +11443,7 @@ function exportSave() {
                 }
         ,
         {
-                    title: '通風換氣、稀釋與排氣機延伸（PDF 41-45頁）',
+                    title: '通風換氣、稀釋與排氣機延伸',
                     subgroups: [
                         {
                             subtitle: '（一）有機溶劑發散量換氣量',
@@ -11527,7 +11544,7 @@ function exportSave() {
                     ]
                 },
         {
-                    title: '溫濕環境危害 WBGT（PDF 46-48頁）',
+                    title: '溫濕環境危害 WBGT',
                     subgroups: [
                         {
                             subtitle: '（一）室內無日曬 WBGT',
@@ -11595,7 +11612,7 @@ function exportSave() {
                     ]
                 },
         {
-                    title: '機械防護、起重吊掛與堆高機（PDF 48-53頁）',
+                    title: '機械防護、起重吊掛與堆高機',
                     subgroups: [
                         {
                             subtitle: '（一）研磨輪周速度',
@@ -11671,7 +11688,7 @@ function exportSave() {
                     ]
                 },
         {
-                    title: '高壓氣體、施工架與照明（PDF 53-59頁）',
+                    title: '高壓氣體、施工架與照明',
                     subgroups: [
                         {
                             subtitle: '（一）高壓氣體儲槽安全距離與壓力換算',
@@ -11753,7 +11770,7 @@ function exportSave() {
                     ]
                 },
         {
-                    title: '電氣安全、電磁波與健康計算（PDF 59-65頁）',
+                    title: '電氣安全、電磁波與健康計算',
                     subgroups: [
                         {
                             subtitle: '（一）用電量與電流基本計算',
