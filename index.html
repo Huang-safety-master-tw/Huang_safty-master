@@ -579,11 +579,25 @@
                 <div class="space-y-5">
                     <div class="bg-slate-950/60 border border-cyan-800/50 rounded-xl p-5 text-left">
                         <h3 class="text-cyan-300 font-bold mb-3">第一題：名詞與定義</h3>
-                        <div id="g36-def-rows" class="space-y-3"></div>
+                        <div class="relative" id="g36-def-board">
+                            <svg id="g36-def-svg" class="absolute pointer-events-none overflow-visible" style="top:0;left:0;width:100%;height:100%;z-index:1;"></svg>
+                            <div class="grid gap-2 relative z-10" style="grid-template-columns:1fr 32px 1fr;">
+                                <div class="flex flex-col gap-2" id="g36-def-left"></div>
+                                <div></div>
+                                <div class="flex flex-col gap-2" id="g36-def-right"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="bg-slate-950/60 border border-cyan-800/50 rounded-xl p-5 text-left">
                         <h3 class="text-cyan-300 font-bold mb-3">第二題：職業安全衛生委員會是否召開</h3>
-                        <div id="g36-committee-rows" class="space-y-3"></div>
+                        <div class="relative" id="g36-committee-board">
+                            <svg id="g36-committee-svg" class="absolute pointer-events-none overflow-visible" style="top:0;left:0;width:100%;height:100%;z-index:1;"></svg>
+                            <div class="grid gap-2 relative z-10" style="grid-template-columns:1fr 32px 1fr;">
+                                <div class="flex flex-col gap-2" id="g36-committee-left"></div>
+                                <div></div>
+                                <div class="flex flex-col gap-2" id="g36-committee-right"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-5 flex justify-end gap-3">
@@ -3194,11 +3208,13 @@
                     <h2 class="text-2xl font-black mt-2">危險性有害性工作 × 對象配對</h2>
                     <p class="text-sm text-slate-400 mt-1">請將左欄的危險性有害性工作與右欄的對象連線配對（一項工作可對應多個對象）。</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- 左欄：工作 -->
-                    <div class="md:col-span-2 space-y-2" id="g28-left"></div>
-                    <!-- 右欄：對象 -->
-                    <div class="space-y-3" id="g28-right"></div>
+                <div class="relative" id="g28-board">
+                    <svg id="g28-svg" class="absolute pointer-events-none overflow-visible" style="top:0;left:0;width:100%;height:100%;z-index:1;"></svg>
+                    <div class="grid gap-3 relative z-10" style="grid-template-columns:minmax(0,2fr) 32px minmax(180px,1fr);">
+                        <div class="space-y-2" id="g28-left"></div>
+                        <div></div>
+                        <div class="space-y-3" id="g28-right"></div>
+                    </div>
                 </div>
                 <!-- 已配對結果 -->
                 <div id="g28-result-area" class="hidden mt-6">
@@ -5297,14 +5313,16 @@ function checkGame10() {
 
         function goToNextGame() {
             soundClick();
-            const idx = gameList.findIndex(g => g.num === currentGameNum);
-            const next = gameList[(idx + 1 + gameList.length) % gameList.length].num;
+            const orderedGames = [...gameList].sort((a, b) => a.num - b.num);
+            const idx = orderedGames.findIndex(g => g.num === currentGameNum);
+            const next = orderedGames[(idx + 1 + orderedGames.length) % orderedGames.length].num;
             goToGame(next);
         }
         function goToPrevGame() {
             soundClick();
-            const idx = gameList.findIndex(g => g.num === currentGameNum);
-            const prev = gameList[(idx - 1 + gameList.length) % gameList.length].num;
+            const orderedGames = [...gameList].sort((a, b) => a.num - b.num);
+            const idx = orderedGames.findIndex(g => g.num === currentGameNum);
+            const prev = orderedGames[(idx - 1 + orderedGames.length) % orderedGames.length].num;
             goToGame(prev);
         }
 
@@ -9928,21 +9946,11 @@ function exportSave() {
         function _lsRestoreG11(data) {
             if (!data) return;
             Object.assign(g11Matched, data);
-            // Visually mark matched items
-            Object.entries(data).forEach(([id, matched]) => {
-                if (matched.left) {
-                    const el = document.getElementById('g11-l-' + id);
-                    if (el) { el.classList.add('border-emerald-500', 'bg-emerald-950/30'); el.classList.remove('border-slate-700'); }
-                }
-                if (matched.mid) {
-                    const el = document.getElementById('g11-m-' + id);
-                    if (el) { el.classList.add('border-emerald-500', 'bg-emerald-950/30'); el.classList.remove('border-slate-700'); }
-                }
-                if (matched.right) {
-                    const el = document.getElementById('g11-r-' + id);
-                    if (el) { el.classList.add('border-emerald-500', 'bg-emerald-950/30'); el.classList.remove('border-slate-700'); }
-                }
-            });
+            if (typeof g11RefreshCards === 'function') g11RefreshCards();
+            if (typeof g11RebuildResult === 'function') g11RebuildResult();
+            setTimeout(() => {
+                if (typeof g11DrawMatchedLines === 'function') g11DrawMatchedLines();
+            }, 80);
         }
 
         function _lsRestoreIconZones(sel, data, prefix) {
@@ -10868,54 +10876,142 @@ function exportSave() {
         ];
         let g28SelectedWork = null;
         let g28Pairs = {};
+
+        function g28LeftClass(state) {
+            const base = 'g28-left-btn block w-full bg-slate-800 hover:bg-violet-900/40 text-white text-xs px-4 py-3 rounded-xl border cursor-pointer transition leading-relaxed text-left';
+            if (state === 'selected') return base + ' border-violet-400 ring-2 ring-violet-400 bg-violet-900/40';
+            if (state === 'matched') return base + ' border-violet-500 bg-violet-950/40';
+            if (state === 'correct') return base + ' border-emerald-500 bg-emerald-950/40 text-emerald-100';
+            if (state === 'wrong') return base + ' border-rose-500 bg-rose-950/40 text-rose-100';
+            return base + ' border-slate-700';
+        }
+
+        function g28RightClass(state) {
+            const base = 'g28-right-btn block w-full bg-slate-800 hover:bg-violet-900/40 text-white text-sm px-4 py-3 rounded-xl border cursor-pointer transition font-bold text-center';
+            if (state === 'used') return base + ' border-violet-500 bg-violet-950/40';
+            if (state === 'correct') return base + ' border-emerald-500 bg-emerald-950/40 text-emerald-100';
+            return base + ' border-slate-700';
+        }
+
         function initGame28() {
             g28SelectedWork = null; g28Pairs = {};
             const left = document.getElementById('g28-left');
             const right = document.getElementById('g28-right');
             const resultArea = document.getElementById('g28-result-area');
             const pairs = document.getElementById('g28-pairs');
+            const svg = document.getElementById('g28-svg');
             if (!left || !right) return;
             left.innerHTML = ''; right.innerHTML = '';
+            if (svg) svg.innerHTML = '';
             if (resultArea) resultArea.classList.add('hidden');
             if (pairs) pairs.innerHTML = '';
             [...g28Data].sort(() => Math.random() - 0.5).forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'bg-slate-800 hover:bg-slate-700 text-white text-xs px-4 py-3 rounded-xl border border-slate-700 cursor-pointer transition leading-relaxed';
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = g28LeftClass();
                 card.innerText = item.work; card.dataset.id = item.id;
                 card.onclick = () => {
+                    triggerTimer();
                     soundClick();
-                    document.querySelectorAll('#g28-left div').forEach(c => c.classList.remove('ring-2','ring-sky-400','bg-sky-900/30'));
-                    card.classList.add('ring-2','ring-sky-400','bg-sky-900/30');
-                    g28SelectedWork = item;
+                    if (g28SelectedWork && g28SelectedWork.id === item.id) {
+                        g28SelectedWork = null;
+                    } else {
+                        g28SelectedWork = item;
+                    }
+                    g28Refresh();
                 };
                 left.appendChild(card);
             });
-            g28Targets.forEach(t => {
-                const btn = document.createElement('div');
-                btn.className = 'bg-slate-800 hover:bg-slate-700 text-white text-sm px-4 py-3 rounded-xl border border-slate-700 cursor-pointer transition font-bold text-center';
+            [...g28Targets].sort(() => Math.random() - 0.5).forEach(t => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = g28RightClass();
                 btn.innerText = t.label; btn.dataset.tid = t.id;
                 btn.onclick = () => {
                     if (!g28SelectedWork) { showToast('請先點選左欄的工作項目！', 'info'); return; }
+                    triggerTimer();
                     soundClick();
                     const wid = g28SelectedWork.id;
                     if (!g28Pairs[wid]) g28Pairs[wid] = { work: g28SelectedWork.work, targets: [] };
-                    if (!g28Pairs[wid].targets.includes(t.id)) {
-                        g28Pairs[wid].targets.push(t.id);
-                        const pairsDiv = document.getElementById('g28-pairs');
-                        const resultArea = document.getElementById('g28-result-area');
-                        if (resultArea) resultArea.classList.remove('hidden');
-                        const row = document.createElement('div');
-                        row.className = 'bg-slate-800/60 rounded-lg px-4 py-2 text-sm flex gap-2 items-start';
-                        row.innerHTML = `<span class="text-orange-400 font-bold shrink-0">工作${wid}</span><span class="text-slate-300 flex-1">${g28SelectedWork.work}</span><span class="text-yellow-400 font-bold shrink-0">→ ${t.label}</span>`;
-                        if (pairsDiv) pairsDiv.appendChild(row);
-                        showToast(`已配對：工作${wid} → ${t.label}`, 'info');
-                    }
+                    const idx = g28Pairs[wid].targets.indexOf(t.id);
+                    if (idx >= 0) g28Pairs[wid].targets.splice(idx, 1);
+                    else g28Pairs[wid].targets.push(t.id);
+                    if (g28Pairs[wid].targets.length === 0) delete g28Pairs[wid];
+                    g28SelectedWork = null;
+                    g28Refresh();
+                    setTimeout(lsSave, 150);
                 };
                 right.appendChild(btn);
             });
         }
+
+        function g28Refresh(mode) {
+            document.querySelectorAll('#g28-left .g28-left-btn').forEach(btn => {
+                const id = Number(btn.dataset.id);
+                const selected = g28SelectedWork && g28SelectedWork.id === id;
+                const used = !!(g28Pairs[id] && g28Pairs[id].targets.length);
+                btn.className = g28LeftClass(selected ? 'selected' : used ? 'matched' : null);
+            });
+            document.querySelectorAll('#g28-right .g28-right-btn').forEach(btn => {
+                const tid = btn.dataset.tid;
+                const used = Object.values(g28Pairs).some(pair => pair.targets.includes(tid));
+                btn.className = g28RightClass(used ? 'used' : null);
+            });
+            g28RenderPairs();
+            g28DrawLines(mode === 'answer' ? '#10b981' : '#8b5cf6');
+        }
+
+        function g28RenderPairs() {
+            const resultArea = document.getElementById('g28-result-area');
+            const pairsDiv = document.getElementById('g28-pairs');
+            if (!resultArea || !pairsDiv) return;
+            pairsDiv.innerHTML = '';
+            const rows = [];
+            Object.keys(g28Pairs).forEach(wid => {
+                const item = g28Data.find(d => String(d.id) === String(wid));
+                (g28Pairs[wid].targets || []).forEach(tid => {
+                    const target = g28Targets.find(t => t.id === tid);
+                    if (item && target) rows.push({ item, target });
+                });
+            });
+            resultArea.classList.toggle('hidden', rows.length === 0);
+            rows.forEach(({ item, target }) => {
+                const row = document.createElement('div');
+                row.className = 'bg-slate-800/60 rounded-lg px-4 py-2 text-sm flex gap-2 items-start';
+                row.innerHTML = `<span class="text-orange-400 font-bold shrink-0">工作${item.id}</span><span class="text-slate-300 flex-1">${item.work}</span><span class="text-yellow-400 font-bold shrink-0">→ ${target.label}</span>`;
+                pairsDiv.appendChild(row);
+            });
+        }
+
+        function g28DrawLines(color) {
+            const svg = document.getElementById('g28-svg');
+            const board = document.getElementById('g28-board');
+            if (!svg || !board) return;
+            svg.innerHTML = '';
+            const br = board.getBoundingClientRect();
+            Object.keys(g28Pairs).forEach(wid => {
+                const leftEl = document.querySelector(`#g28-left .g28-left-btn[data-id="${wid}"]`);
+                if (!leftEl) return;
+                (g28Pairs[wid].targets || []).forEach(tid => {
+                    const rightEl = document.querySelector(`#g28-right .g28-right-btn[data-tid="${tid}"]`);
+                    if (!rightEl) return;
+                    const lr = leftEl.getBoundingClientRect();
+                    const rr = rightEl.getBoundingClientRect();
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', lr.right - br.left);
+                    line.setAttribute('y1', lr.top + lr.height / 2 - br.top);
+                    line.setAttribute('x2', rr.left - br.left);
+                    line.setAttribute('y2', rr.top + rr.height / 2 - br.top);
+                    line.setAttribute('stroke', color || '#8b5cf6');
+                    line.setAttribute('stroke-width', '2.5');
+                    line.setAttribute('stroke-linecap', 'round');
+                    svg.appendChild(line);
+                });
+            });
+        }
+
         function checkGame28() {
-            let correct = 0, total = 0;
+            let correct = 0, total = 0, extra = 0;
             g28Data.forEach(item => {
                 item.targets.forEach(t => {
                     total++;
@@ -10923,22 +11019,34 @@ function exportSave() {
                     if (paired) correct++;
                 });
             });
-            if (correct === total && Object.keys(g28Pairs).length > 0) {
+            Object.keys(g28Pairs).forEach(wid => {
+                const item = g28Data.find(d => String(d.id) === String(wid));
+                (g28Pairs[wid].targets || []).forEach(tid => {
+                    if (!item || !item.targets.includes(tid)) extra++;
+                });
+            });
+            document.querySelectorAll('#g28-left .g28-left-btn').forEach(btn => {
+                const item = g28Data.find(d => String(d.id) === String(btn.dataset.id));
+                const actual = (g28Pairs[btn.dataset.id] && g28Pairs[btn.dataset.id].targets) || [];
+                const ok = item && item.targets.length === actual.length && item.targets.every(t => actual.includes(t));
+                btn.className = g28LeftClass(ok ? 'correct' : actual.length ? 'wrong' : null);
+            });
+            if (correct === total && extra === 0 && Object.keys(g28Pairs).length > 0) {
                 completedGames.game28 = true; recordTime(28); soundSuccess(); showConfetti(); showToast('🎉 危險性有害性工作配對全部正確！', 'success');
-            } else { soundError(); showToast(`❌ 答對 ${correct}/${total} 個配對，請補充遺漏的配對！`, 'error'); }
+                g28DrawLines('#10b981');
+            } else { soundError(); showToast(`❌ 正確配對 ${correct}/${total}，多選 ${extra} 個，請修正！`, 'error'); }
             updateTrophyCount();
         }
         function showAnswer28() {
-            _showAnswerPanel('第28關：危險性有害性工作對象', `
-                <p class="text-slate-300 text-sm leading-relaxed">
-                答案：<br>
-                1（運轉中機器…）→ B（未滿十八歲者勞工）<br>
-                2（鑿岩機…）→ A（妊娠中之女性勞工）、B（未滿十八歲者勞工）<br>
-                3（鉛及其化合物…）→ A（妊娠中之女性勞工）、C（分娩後未滿一年之女性勞工）<br>
-                4（有害輻射…）→ A（妊娠中之女性勞工）、B（未滿十八歲者勞工）<br>
-                5（爆炸性、易燃性…）→ B（未滿十八歲者勞工）
-                </p>
-            `);
+            g28Pairs = {};
+            g28Data.forEach(item => {
+                g28Pairs[item.id] = { work: item.work, targets: [...item.targets] };
+            });
+            g28SelectedWork = null;
+            g28Refresh('answer');
+            document.querySelectorAll('#g28-left .g28-left-btn').forEach(btn => btn.className = g28LeftClass('correct'));
+            document.querySelectorAll('#g28-right .g28-right-btn').forEach(btn => btn.className = g28RightClass('correct'));
+            showToast('📖 第28關解答已直接畫出連線。', 'info');
         }
 
 
@@ -14416,68 +14524,157 @@ window.addEventListener('resize', () => {
         }
 
         const g36DefItems = [
-            { id: 'perf', left: '績效', answer: '可量測之結果。' },
-            { id: 'hazard', left: '危害', answer: '潛在造成人員受傷及健康妨礙之來源。' },
-            { id: 'competence', left: '適任性', answer: '運用知識與技能達成預期結果之能力。' },
-            { id: 'incident', left: '事故', answer: '由工作所引起或工作過程中發生，可能或確實造成受傷及健康妨礙的情勢。' },
-            { id: 'risk', left: '風險', answer: '不確定性之效應。' }
+            { id: 'perf', left: '績效', answer: 'E' },
+            { id: 'hazard', left: '危害', answer: 'C' },
+            { id: 'competence', left: '適任性', answer: 'B' },
+            { id: 'incident', left: '事故', answer: 'D' },
+            { id: 'risk', left: '風險', answer: 'A' }
         ];
         const g36DefOptions = [
-            '不確定性之效應。',
-            '運用知識與技能達成預期結果之能力。',
-            '潛在造成人員受傷及健康妨礙之來源。',
-            '由工作所引起或工作過程中發生，可能或確實造成受傷及健康妨礙的情勢。',
-            '可量測之結果。'
+            { key: 'A', text: '不確定性之效應。' },
+            { key: 'B', text: '運用知識與技能達成預期結果之能力。' },
+            { key: 'C', text: '潛在造成人員受傷及健康妨礙之來源。' },
+            { key: 'D', text: '由工作所引起或工作過程中發生，可能或確實造成受傷及健康妨礙的情勢。' },
+            { key: 'E', text: '可量測之結果。' }
         ];
         const g36CommitteeItems = [
-            { id: 'a', left: '第二類事業｜500人餐旅業', answer: '召開' },
-            { id: 'b', left: '第二類事業｜250人醫院', answer: '不用召開' },
-            { id: 'c', left: '第二類事業｜200人印刷製品製造業', answer: '不用召開' },
-            { id: 'd', left: '第一類事業｜200人紡織業', answer: '召開' },
-            { id: 'e', left: '第一類事業｜120人水泥製品製造業', answer: '召開' }
+            { id: 'a', left: '第二類事業｜500人餐旅業', answer: 'Y' },
+            { id: 'b', left: '第二類事業｜250人醫院', answer: 'N' },
+            { id: 'c', left: '第二類事業｜200人印刷製品製造業', answer: 'N' },
+            { id: 'd', left: '第一類事業｜200人紡織業', answer: 'Y' },
+            { id: 'e', left: '第一類事業｜120人水泥製品製造業', answer: 'Y' }
         ];
+        const g36CommitteeOptions = [
+            { key: 'Y', text: '召開' },
+            { key: 'N', text: '不用召開' }
+        ];
+        const g36Groups = {
+            def: { leftId: 'g36-def-left', rightId: 'g36-def-right', boardId: 'g36-def-board', svgId: 'g36-def-svg', items: g36DefItems, options: g36DefOptions },
+            committee: { leftId: 'g36-committee-left', rightId: 'g36-committee-right', boardId: 'g36-committee-board', svgId: 'g36-committee-svg', items: g36CommitteeItems, options: g36CommitteeOptions }
+        };
+        let g36Selected = {};
+        let g36Matched = { def: {}, committee: {} };
 
         function initGame36() {
-            renderG36Rows('g36-def-rows', g36DefItems, g36DefOptions);
-            renderG36Rows('g36-committee-rows', g36CommitteeItems, ['召開', '不用召開']);
+            g36Selected = {};
+            g36Matched = { def: {}, committee: {} };
+            renderG36MatchGroup('def');
+            renderG36MatchGroup('committee');
         }
 
-        function renderG36Rows(containerId, items, options) {
-            var container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = items.map(function(item) {
-                var buttons = options.map(function(opt) {
-                    return '<button type="button" class="g36-choice bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-lg text-left text-sm transition" data-value="' + escapeHtml(opt) + '">' + escapeHtml(opt) + '</button>';
-                }).join('');
-                return '<div class="g36-row bg-slate-900/70 border border-slate-700 rounded-xl p-3" data-answer="' + escapeHtml(item.answer) + '">' +
-                    '<div class="font-bold text-white mb-2">' + escapeHtml(item.left) + '</div>' +
-                    '<div class="grid md:grid-cols-2 gap-2">' + buttons + '</div>' +
-                    '</div>';
-            }).join('');
-            container.querySelectorAll('.g36-choice').forEach(function(btn) {
-                btn.onclick = function() {
-                    triggerTimer();
-                    soundClick();
-                    var row = btn.closest('.g36-row');
-                    row.dataset.selected = btn.dataset.value;
-                    row.querySelectorAll('.g36-choice').forEach(function(b) {
-                        b.className = 'g36-choice bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-lg text-left text-sm transition';
-                    });
-                    btn.className = 'g36-choice bg-cyan-900/70 border border-cyan-400 text-cyan-100 px-3 py-2 rounded-lg text-left text-sm transition ring-2 ring-cyan-400';
-                };
+        function renderG36MatchGroup(groupKey) {
+            const group = g36Groups[groupKey];
+            const left = document.getElementById(group.leftId);
+            const right = document.getElementById(group.rightId);
+            const svg = document.getElementById(group.svgId);
+            if (!left || !right) return;
+            const shuffledOptions = [...group.options].sort(() => Math.random() - 0.5);
+            left.innerHTML = group.items.map(item =>
+                `<button id="g36-${groupKey}-L-${item.id}" type="button" onclick="g36SelectLeft('${groupKey}', this)" data-id="${escapeHtml(item.id)}" class="g36-left-btn bg-slate-800 hover:bg-cyan-900/40 border border-slate-600 text-white text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer">${escapeHtml(item.left)}</button>`
+            ).join('');
+            right.innerHTML = shuffledOptions.map(opt =>
+                `<button id="g36-${groupKey}-R-${opt.key}" type="button" onclick="g36SelectRight('${groupKey}', this)" data-key="${escapeHtml(opt.key)}" class="g36-right-btn bg-slate-800 hover:bg-cyan-900/40 border border-slate-600 text-slate-200 text-xs px-2.5 py-2 rounded-lg text-left transition cursor-pointer">${escapeHtml(opt.text)}</button>`
+            ).join('');
+            if (svg) svg.innerHTML = '';
+        }
+
+        function g36SelectLeft(groupKey, btn) {
+            triggerTimer();
+            soundClick();
+            const id = btn.dataset.id;
+            if (g36Matched[groupKey][id]) {
+                delete g36Matched[groupKey][id];
+                btn.className = 'g36-left-btn bg-slate-800 hover:bg-cyan-900/40 border border-slate-600 text-white text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+                g36RefreshGroupStyles(groupKey);
+                g36DrawLines(groupKey);
+                g36Selected[groupKey] = null;
+                return;
+            }
+            document.querySelectorAll(`#${g36Groups[groupKey].leftId} .g36-left-btn`).forEach(b => {
+                if (!g36Matched[groupKey][b.dataset.id]) b.classList.remove('ring-2', 'ring-cyan-400', 'bg-cyan-900/60');
+            });
+            if (g36Selected[groupKey] === id) {
+                g36Selected[groupKey] = null;
+                btn.classList.remove('ring-2', 'ring-cyan-400', 'bg-cyan-900/60');
+                return;
+            }
+            g36Selected[groupKey] = id;
+            btn.classList.add('ring-2', 'ring-cyan-400', 'bg-cyan-900/60');
+        }
+
+        function g36SelectRight(groupKey, btn) {
+            if (!g36Selected[groupKey]) return;
+            triggerTimer();
+            soundClick();
+            const leftId = g36Selected[groupKey];
+            g36Matched[groupKey][leftId] = btn.dataset.key;
+            g36Selected[groupKey] = null;
+            g36RefreshGroupStyles(groupKey);
+            g36DrawLines(groupKey);
+            setTimeout(lsSave, 150);
+        }
+
+        function g36RefreshGroupStyles(groupKey) {
+            const group = g36Groups[groupKey];
+            document.querySelectorAll(`#${group.leftId} .g36-left-btn`).forEach(btn => {
+                const matched = !!g36Matched[groupKey][btn.dataset.id];
+                btn.className = matched
+                    ? 'g36-left-btn bg-cyan-900/60 border border-cyan-500 text-cyan-100 text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer'
+                    : 'g36-left-btn bg-slate-800 hover:bg-cyan-900/40 border border-slate-600 text-white text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+            });
+            document.querySelectorAll(`#${group.rightId} .g36-right-btn`).forEach(btn => {
+                const used = Object.values(g36Matched[groupKey]).includes(btn.dataset.key);
+                btn.className = used
+                    ? 'g36-right-btn bg-cyan-900/60 border border-cyan-500 text-cyan-100 text-xs px-2.5 py-2 rounded-lg text-left transition cursor-pointer'
+                    : 'g36-right-btn bg-slate-800 hover:bg-cyan-900/40 border border-slate-600 text-slate-200 text-xs px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+            });
+        }
+
+        function g36DrawLines(groupKey, color) {
+            const group = g36Groups[groupKey];
+            const svg = document.getElementById(group.svgId);
+            const board = document.getElementById(group.boardId);
+            if (!svg || !board) return;
+            svg.innerHTML = '';
+            const br = board.getBoundingClientRect();
+            Object.keys(g36Matched[groupKey]).forEach(leftId => {
+                const rightKey = g36Matched[groupKey][leftId];
+                const leftEl = document.getElementById(`g36-${groupKey}-L-${leftId}`);
+                const rightEl = document.getElementById(`g36-${groupKey}-R-${rightKey}`);
+                if (!leftEl || !rightEl) return;
+                const lr = leftEl.getBoundingClientRect();
+                const rr = rightEl.getBoundingClientRect();
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', lr.right - br.left);
+                line.setAttribute('y1', lr.top + lr.height / 2 - br.top);
+                line.setAttribute('x2', rr.left - br.left);
+                line.setAttribute('y2', rr.top + rr.height / 2 - br.top);
+                line.setAttribute('stroke', color || '#06b6d4');
+                line.setAttribute('stroke-width', '2.5');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
             });
         }
 
         function checkGame36() {
-            var correct = 0;
-            var total = 0;
-            document.querySelectorAll('.g36-row').forEach(function(row) {
-                total++;
-                var ok = row.dataset.selected === row.dataset.answer;
-                row.classList.remove('border-slate-700', 'border-emerald-500', 'border-rose-500');
-                row.classList.add(ok ? 'border-emerald-500' : 'border-rose-500');
-                if (ok) correct++;
+            let correct = 0;
+            let total = 0;
+            Object.keys(g36Groups).forEach(groupKey => {
+                const group = g36Groups[groupKey];
+                group.items.forEach(item => {
+                    total++;
+                    const ok = g36Matched[groupKey][item.id] === item.answer;
+                    const leftEl = document.getElementById(`g36-${groupKey}-L-${item.id}`);
+                    if (ok) {
+                        correct++;
+                        if (leftEl) leftEl.className = 'g36-left-btn bg-emerald-900/60 border border-emerald-500 text-emerald-100 text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+                    } else if (leftEl) {
+                        leftEl.className = 'g36-left-btn bg-rose-900/60 border border-rose-500 text-rose-100 text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+                    }
+                });
             });
+            g36DrawLines('def');
+            g36DrawLines('committee');
             if (correct === total) {
                 completedGames.game36 = true;
                 recordTime(36);
@@ -14492,16 +14689,16 @@ window.addEventListener('resize', () => {
         }
 
         function showAnswer36() {
-            document.querySelectorAll('.g36-row').forEach(function(row) {
-                row.dataset.selected = row.dataset.answer;
-                row.querySelectorAll('.g36-choice').forEach(function(btn) {
-                    var ok = btn.dataset.value === row.dataset.answer;
-                    btn.className = ok
-                        ? 'g36-choice bg-emerald-900/70 border border-emerald-400 text-emerald-100 px-3 py-2 rounded-lg text-left text-sm transition ring-2 ring-emerald-400'
-                        : 'g36-choice bg-slate-800 border border-slate-700 text-slate-400 px-3 py-2 rounded-lg text-left text-sm transition';
+            Object.keys(g36Groups).forEach(groupKey => {
+                const group = g36Groups[groupKey];
+                group.items.forEach(item => { g36Matched[groupKey][item.id] = item.answer; });
+                document.querySelectorAll(`#${group.leftId} .g36-left-btn`).forEach(btn => {
+                    btn.className = 'g36-left-btn bg-emerald-900/60 border border-emerald-500 text-emerald-100 text-xs font-bold px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
                 });
-                row.classList.remove('border-slate-700', 'border-rose-500');
-                row.classList.add('border-emerald-500');
+                document.querySelectorAll(`#${group.rightId} .g36-right-btn`).forEach(btn => {
+                    btn.className = 'g36-right-btn bg-emerald-900/60 border border-emerald-500 text-emerald-100 text-xs px-2.5 py-2 rounded-lg text-left transition cursor-pointer';
+                });
+                setTimeout(() => g36DrawLines(groupKey, '#10b981'), 80);
             });
             showToast('📖 第36關解答已顯示！', 'info');
         }
