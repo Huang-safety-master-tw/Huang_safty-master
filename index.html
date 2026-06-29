@@ -922,7 +922,7 @@
                         <div class="ghs-text-zone bg-slate-900/50 p-3 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center min-h-[110px] cursor-pointer transition hover:border-slate-500"
                              data-zone-id="1" onclick="placeGhsIcon(this)">
                             <div class="ghs-icon-slot relative w-full h-16 flex items-center justify-center mb-2 rounded-lg bg-slate-950/50"></div>
-                            <p class="text-[11px] font-bold text-slate-300 text-center leading-tight">爆炸物 / 自反應 / 有機過氧化物</p>
+                            <p class="text-[11px] font-bold text-slate-300 text-center leading-tight">爆炸物</p>
                         </div>
                         <div class="ghs-text-zone bg-slate-900/50 p-3 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center min-h-[110px] cursor-pointer transition hover:border-slate-500"
                              data-zone-id="2" onclick="placeGhsIcon(this)">
@@ -965,26 +965,33 @@
                             <p class="text-[11px] font-bold text-slate-300 text-center leading-tight">警告</p>
                         </div>
                     </div>
+                    <div class="mt-4 flex justify-end gap-3">
+                        <button onclick="resetGame6Icons()" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded-lg border border-slate-700 font-bold">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 重玩圖式
+                        </button>
+                        <button onclick="showAnswer6Icons()" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-bold px-5 py-2.5 rounded-lg shadow-lg transition flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> 公布圖式解答</button>
+                        <button onclick="checkGame6()" class="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg hover:brightness-110 transition">驗證圖式配對</button>
+                    </div>
                 </div>
 
 
                 <!-- ===== 化學品文字字卡配對區 ===== -->
                 <div class="mt-8 border-t border-slate-700 pt-6">
                     <h3 class="text-base font-black text-white mb-1 flex items-center gap-2">
-                        <i data-lucide="flask-conical" class="w-5 h-5 text-rose-400"></i> 化學品歸類（共 38 張字卡）
+                        <i data-lucide="flask-conical" class="w-5 h-5 text-rose-400"></i> 化學品歸類（共 35 張字卡）
                     </h3>
                     <p class="text-xs text-slate-400 mb-4">請將下方化學品字卡放入正確的 GHS 危害分類框中。</p>
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col">
                             <div class="flex justify-between items-center mb-3">
                                 <h4 class="text-xs font-bold text-slate-400">化學品字卡庫</h4>
-                                <span id="ghs-pool-count" class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">38</span>
+                                <span id="ghs-pool-count" class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">35</span>
                             </div>
                             <div class="flex flex-wrap gap-1.5 overflow-y-auto max-h-[400px] pr-1" id="ghs-item-pool"></div>
                         </div>
                         <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                             <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex flex-col" data-ghs="1">
-                                <div class="text-xs font-black text-rose-400 border-b border-slate-800 pb-1.5 mb-2 flex justify-between"><span>爆炸物/自反應/有機過氧化物</span><span id="ghs-count-1" class="text-slate-500">(0)</span></div>
+                                <div class="text-xs font-black text-rose-400 border-b border-slate-800 pb-1.5 mb-2 flex justify-between"><span>爆炸物</span><span id="ghs-count-1" class="text-slate-500">(0)</span></div>
                                 <div class="ghs-dropzone flex-grow space-y-1 min-h-[60px]" id="ghs-zone-1"></div>
                             </div>
                             <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex flex-col" data-ghs="2">
@@ -1018,15 +1025,12 @@
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end gap-3">
+                        <button onclick="initGame6Chemical()" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded-lg border border-slate-700 font-bold">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 重玩化學品
+                        </button>
+                        <button onclick="showAnswer6()" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-bold px-5 py-2.5 rounded-lg shadow-lg transition flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> 公布化學品解答</button>
                         <button onclick="checkGame6Chemical()" class="bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg hover:brightness-110 transition">驗證化學品分類</button>
                     </div>
-                </div>
-                <div class="mt-6 flex justify-end gap-3">
-                    <button onclick="resetSingleGame(6)" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded-lg border border-slate-700 font-bold">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 重玩本關
-                    </button>
-                    <button onclick="showAnswer6()" class="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-bold px-5 py-2.5 rounded-lg shadow-lg transition flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> 公布解答</button>
-                    <button onclick="checkGame6()" class="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg hover:brightness-110 transition">驗證配對</button>
                 </div>
             </div>
         </section>
@@ -3327,9 +3331,6 @@
                     <div class="flex gap-3 flex-wrap">
                         <button onclick="g29Prev()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2.5 rounded-lg transition text-sm">‹ 上一題</button>
                         <button onclick="g29Next()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2.5 rounded-lg transition text-sm">下一題 ›</button>
-                        <button onclick="resetSingleGame(29)" class="text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 rounded-lg border border-slate-700 font-bold text-sm">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 重玩本關
-                        </button>
 
                     </div>
                 </div>
@@ -3954,6 +3955,24 @@
         
         }
 
+        function resetGame6Icons() {
+            selectedGhsIcon = null;
+            shuffleGhsChildren('ghs-icon-pool');
+            shuffleGhsChildren('ghs-text-zones');
+            document.querySelectorAll('.ghs-icon-card').forEach(card => {
+                card.style.display = 'flex';
+                card.classList.remove('ring-4', 'ring-rose-500');
+            });
+            document.querySelectorAll('.ghs-text-zone').forEach(zone => {
+                const slot = zone.querySelector('.ghs-icon-slot');
+                if (slot) slot.innerHTML = '';
+                zone.dataset.placedIconId = '';
+                zone.className = 'ghs-text-zone bg-slate-900/50 p-3 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center min-h-[110px] cursor-pointer transition hover:border-slate-500';
+            });
+            updateGhsIconProgress();
+            showToast('已重置 GHS 圖式配對', 'info');
+        }
+
         function selectGhsIcon(card) {
             triggerTimer();
             soundClick();
@@ -4077,10 +4096,10 @@
         // g6Data: text = 顯示文字, parent = 所屬 zone（用於字卡建立）
         // g6ValidMap: 每個 zone 的合法文字清單（文字比對用）
         const g6Data = [
-            { text: "過氧化丁酮", parent: 1 }, { text: "自反應物質型", parent: 1 }, { text: "有機過氧化物型", parent: 1 },
+            { text: "過氧化丁酮", parent: 1 },
             { text: "氧化性氣體、氣膠、液體或固體", parent: 2 }, { text: "雙氧水", parent: 2 },
             { text: "呼吸道過敏物質", parent: 3 }, { text: "生殖細胞致突變生物質", parent: 3 }, { text: "致癌物質", parent: 3 }, { text: "生殖毒性毒物", parent: 3 }, { text: "特定標的器官系統毒性物－暴露", parent: 3 }, { text: "特定標的器官系統毒性物－重複暴露", parent: 3 }, { text: "吸入性危害物質", parent: 3 }, { text: "雙氧水", parent: 3 }, { text: "汽油", parent: 3 },
-            { text: "易燃氣體、氣膠、液體或固體", parent: 4 }, { text: "自反應物質型", parent: 4 }, { text: "發火性液體或固體", parent: 4 }, { text: "自熱物質", parent: 4 }, { text: "禁水性物質", parent: 4 }, { text: "有機過氧化物型", parent: 4 }, { text: "甲烷", parent: 4 }, { text: "乙炔", parent: 4 }, { text: "汽油", parent: 4 },
+            { text: "易燃氣體、氣膠、液體或固體", parent: 4 }, { text: "發火性液體或固體", parent: 4 }, { text: "自熱物質", parent: 4 }, { text: "禁水性物質", parent: 4 }, { text: "甲烷", parent: 4 }, { text: "乙炔", parent: 4 }, { text: "汽油", parent: 4 },
             { text: "氨", parent: 5 }, { text: "硫酸", parent: 5 },
             { text: "氨", parent: 6 }, { text: "硫酸", parent: 6 },
             { text: "腐蝕/刺激皮膚物質", parent: 7 }, { text: "嚴重損傷/刺激眼睛物質", parent: 7 }, { text: "氨", parent: 7 }, { text: "硫酸", parent: 7 }, { text: "雙氧水", parent: 7 },
@@ -4088,10 +4107,10 @@
         ];
         // 每個 zone 的合法文字清單（文字比對用，支援重複字卡互換）
         const g6ValidMap = {
-            1: ["過氧化丁酮", "自反應物質型", "有機過氧化物型"],
+            1: ["過氧化丁酮"],
             2: ["氧化性氣體、氣膠、液體或固體", "雙氧水"],
             3: ["呼吸道過敏物質", "生殖細胞致突變生物質", "致癌物質", "生殖毒性毒物", "特定標的器官系統毒性物－暴露", "特定標的器官系統毒性物－重複暴露", "吸入性危害物質", "雙氧水", "汽油"],
-            4: ["易燃氣體、氣膠、液體或固體", "自反應物質型", "發火性液體或固體", "自熱物質", "禁水性物質", "有機過氧化物型", "甲烷", "乙炔", "汽油"],
+            4: ["易燃氣體、氣膠、液體或固體", "發火性液體或固體", "自熱物質", "禁水性物質", "甲烷", "乙炔", "汽油"],
             5: ["氨", "硫酸"],
             6: ["氨", "硫酸"],
             7: ["腐蝕/刺激皮膚物質", "嚴重損傷/刺激眼睛物質", "氨", "硫酸", "雙氧水"],
@@ -5173,6 +5192,11 @@ function checkGame10() {
         function renderCurrentGameMastery() {
             const el = document.getElementById('game-mastery-control');
             if (!el || !currentGameNum) return;
+            if (currentGameNum === 29) {
+                el.classList.add('hidden');
+                el.innerHTML = '';
+                return;
+            }
             const rating = getGameMastery(currentGameNum);
             el.classList.remove('hidden');
             el.innerHTML = `<span class="text-xs text-slate-400 mr-1">熟練度</span>${renderGameMasteryStars(currentGameNum, true)}<span class="text-xs text-yellow-200 ml-1">${gameMasteryLabel(rating)}</span>`;
@@ -8116,6 +8140,39 @@ function checkGame10() {
                 </ol>`, 'red');
         }
 
+        function showAnswer6Icons() {
+            const correctMap = {
+                '1': '1',
+                '2': '2',
+                '3': '3',
+                '4': '7',
+                '5': '8',
+                '6': '5',
+                '7': '4',
+                '8': '9',
+                '9': '6'
+            };
+            selectedGhsIcon = null;
+            document.querySelectorAll('.ghs-icon-card').forEach(card => {
+                card.style.display = 'none';
+                card.classList.remove('ring-4', 'ring-rose-500');
+            });
+            document.querySelectorAll('.ghs-text-zone').forEach(zone => {
+                const iconId = correctMap[zone.dataset.zoneId];
+                const card = document.querySelector(`.ghs-icon-card[data-icon-id="${iconId}"]`);
+                const slot = zone.querySelector('.ghs-icon-slot');
+                if (!card || !slot) return;
+                const img = card.querySelector('img').cloneNode(true);
+                img.className = 'w-12 h-12 object-contain';
+                slot.innerHTML = '';
+                slot.appendChild(img);
+                zone.dataset.placedIconId = iconId;
+                zone.className = 'ghs-text-zone bg-emerald-950/30 p-3 rounded-xl border-2 border-emerald-500 flex flex-col items-center justify-center min-h-[110px] transition';
+            });
+            updateGhsIconProgress();
+            showToast('📖 GHS 圖式解答已填入！', 'info');
+        }
+
         function showAnswer6() {
             // Step 1：先備份目前各 ghs-zone 的字卡狀態（在清空之前）
             const backup = {}; // { originalId: { isCorrect: bool } }
@@ -10864,8 +10921,8 @@ function exportSave() {
         // ===== 第 28 關：危險性有害性工作對象連連看 =====
         const g28Data = [
             { id: 1, work: '運轉中機器或動力傳導裝置危險部分之掃除、上油、檢查、修理或上卸皮帶、繩索等工作', targets: ['B'] },
-            { id: 2, work: '鑿岩機及其他有顯著振動之工作', targets: ['A','B'] },
-            { id: 3, work: '鉛及其化合物散布場所之工作', targets: ['A','C'] },
+            { id: 2, work: '鑿岩機及其他有顯著振動之工作', targets: ['A','B','C'] },
+            { id: 3, work: '鉛及其化合物散布場所之工作', targets: ['A'] },
             { id: 4, work: '有害輻射散布場所之工作', targets: ['A','B'] },
             { id: 5, work: '處理爆炸性、易燃性等物質之工作', targets: ['B'] }
         ];
@@ -12667,7 +12724,6 @@ function exportSave() {
                                 <p>W₁/W₂ = 1.2³ = 1.728 ≈ <strong class="text-yellow-300">1.7 倍</strong></p>
                             </div>`,
                             blanks: [
-                                { label: '精算倍數', answer: 1.728, tolerance: 0.005 },
                                 { label: '四捨五入至小數點後1位', answer: 1.7, tolerance: 0.05 }
                             ],
                             solution: ''
@@ -13161,6 +13217,31 @@ function exportSave() {
             g29SaveAnswers();
         }
 
+        function g29ClearAnswer(qIdx, subgroupIdx, blankIdx) {
+            g29SaveAnswer(qIdx, subgroupIdx, blankIdx, '');
+            const input = document.getElementById(`g29-input-${subgroupIdx}-${blankIdx}`);
+            const result = document.getElementById(`g29-result-${subgroupIdx}-${blankIdx}`);
+            if (input) input.value = '';
+            if (result) result.innerText = '';
+            showToast('已清除此空格', 'info');
+        }
+
+        function g29ClearSubgroupAnswers(qIdx, subgroupIdx) {
+            const q = g29Bank[qIdx];
+            const sg = (q.subgroups && q.subgroups[subgroupIdx]) ? q.subgroups[subgroupIdx] : q;
+            const blanks = sg && sg.blanks ? sg.blanks : [];
+            blanks.forEach((_, blankIdx) => {
+                const key = g29AnswerKey(qIdx, subgroupIdx, blankIdx);
+                delete g29Answers[key];
+                const input = document.getElementById(`g29-input-${subgroupIdx}-${blankIdx}`);
+                const result = document.getElementById(`g29-result-${subgroupIdx}-${blankIdx}`);
+                if (input) input.value = '';
+                if (result) result.innerText = '';
+            });
+            g29SaveAnswers();
+            showToast('已清除此小題答案', 'info');
+        }
+
         function g29HandleInput(qIdx, subgroupIdx, blankIdx, value) {
             g29SaveAnswer(qIdx, subgroupIdx, blankIdx, value);
             g29TriggerQuestionTimer();
@@ -13381,7 +13462,7 @@ function exportSave() {
                 track.setAttribute('aria-valuenow', String(g29Current + 1));
             }
 
-            let html = `<div class="space-y-6">${g29RenderMastery(g29Current)}`;
+            let html = `<div class="space-y-6">`;
 
             // 如果有 subgroups，渲染多個子題組
             if (q.subgroups && q.subgroups.length > 0) {
@@ -13411,6 +13492,7 @@ function exportSave() {
                     });
                     html += `</div>
                         <div class="flex gap-3 mt-4">
+                            <button onclick="g29ClearSubgroupAnswers(${g29Current}, ${si})" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-sm transition">清除此小題答案</button>
                             <button onclick="showAnswer29(${si})" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm transition">公布解答</button>
                             <button onclick="checkGame29(${si})" class="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white rounded-lg text-sm transition font-bold">確認答案</button>
                         </div>
@@ -13442,6 +13524,7 @@ function exportSave() {
                 });
                 html += `</div>
                     <div class="flex gap-3 mt-4">
+                        <button onclick="g29ClearSubgroupAnswers(${g29Current}, 0)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-sm transition">清除此小題答案</button>
                         <button onclick="showAnswer29(0)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm transition">公布解答</button>
                         <button onclick="checkGame29(0)" class="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white rounded-lg text-sm transition font-bold">確認答案</button>
                     </div>
